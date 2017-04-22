@@ -21,6 +21,9 @@
     <ClCompile Include="NetworkService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WinsocModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetworkService.h">

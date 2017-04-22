@@ -3,8 +3,7 @@
 
 #define MAX_PACKET_SIZE 1000000
 
-#include <DirectXMath.h>
-#include <ctime>
+#include <string>
 
 enum PacketHeader {
 	DEFUALT = 0,

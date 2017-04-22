@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkService.cpp" />
+    <ClCompile Include="WinsocModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetworkData.h" />
