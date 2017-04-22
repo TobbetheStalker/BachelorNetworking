@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkService.h" />
+    <ClInclude Include="WinsocModule.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
