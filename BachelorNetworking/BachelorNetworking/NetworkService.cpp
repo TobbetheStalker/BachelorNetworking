@@ -1,4 +1,3 @@
-
 #include "NetworkService.h"
 
 int NetworkService::sendMessage(SOCKET curSocket, char * message, int messageSize)
@@ -10,3 +9,4 @@ int NetworkService::receiveMessage(SOCKET curSocket, char * buffer, int bufSize)
 {
 	return recv(curSocket, buffer, bufSize, 0);	//if no error, returns the number of bytes received and the buffer, else error code
 }
+

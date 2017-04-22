@@ -1,3 +1,7 @@
+#ifndef NETWORKSERVICE_H
+#define NETWORKSERVICE_H
+
+
 #include <winsock2.h>
 #include <Windows.h>
 
@@ -11,4 +15,10 @@ public:
 	static int receiveMessage(SOCKET curSocket, char* buffer, int bufSize);
 
 };
+
+
+
+#endif
+
+
 
