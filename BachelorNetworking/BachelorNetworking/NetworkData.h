@@ -7,6 +7,7 @@
 
 enum PacketHeader {
 	DEFUALT = 0,
+	CONNECTION_REQUEST,
 };
 
 struct Packet

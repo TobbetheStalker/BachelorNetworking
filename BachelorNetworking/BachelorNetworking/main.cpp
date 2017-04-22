@@ -6,9 +6,11 @@
 int main()
 {
 	
-	for (int i = 0; i < 9; i++) {
-		printf("%d \n", i);
-	}
+	WinsocModule wsModule;
+
+	wsModule.Initialize();
+
+	wsModule.Connect("192.168.99.5");
 
 	return 0;
 }
