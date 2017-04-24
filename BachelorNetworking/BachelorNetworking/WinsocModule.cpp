@@ -6,13 +6,15 @@ WinsocModule::WinsocModule()
 {
 	this->m_ClientID = 0;
 	this->m_PacketID = 0;
+
+	this->m_CurrentProtocol = Protocol::NONE;
 }
 
 WinsocModule::~WinsocModule()
 {
 }
 
-int WinsocModule::Initialize()
+int WinsocModule::Initialize(Protocol newProtocol)
 {
 	printf("Initializing Network module... \n");
 
@@ -33,12 +35,29 @@ int WinsocModule::Initialize()
 
 	// Set address information
 	ZeroMemory(&hints, sizeof(hints));	// Empties hints
-	hints.ai_family = AF_INET;			// The Internet Protocol version 4 (IPv4) address family
-	hints.ai_socktype = SOCK_STREAM;	// Provides sequenced, reliable, two-way, connection-based byte streams with an OOB data transmission mechanism
-	hints.ai_protocol = IPPROTO_TCP;    // Set to use TCP
-	hints.ai_flags = AI_PASSIVE;		// The socket address will be used in a call to the bind function
+	
+	if (newProtocol == Protocol::TCP || newProtocol == Protocol::TCP_WITH_NODELAY)
+	{
+		hints.ai_family = AF_INET;			// The Internet Protocol version 4 (IPv4) address family
+		hints.ai_socktype = SOCK_STREAM;	// Provides sequenced, reliable, two-way, connection-based byte streams with an OOB data transmission mechanism
+		hints.ai_protocol = IPPROTO_TCP;    // Set to use TCP
+		hints.ai_flags = AI_PASSIVE;		// The socket address will be used in a call to the bind function
+	}
+	else if (newProtocol == Protocol::UDP)
+	{
+		hints.ai_family = AF_INET;			
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		hints.ai_flags = AI_PASSIVE;		
+	}
+	else
+	{
+		printf("Unknown Protocol \n");
+		WSACleanup();
+		return 0;
+	}
 
-										// Resolve the server address and port
+	// Resolve the server address and port
 	iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);	//NULL = Dont need addres since it will be on local machine
 
 	if (iResult != 0) {
@@ -68,7 +87,7 @@ int WinsocModule::Initialize()
 		return 0;
 	}
 
-	// Setup the TCP listening socket
+	// Setup the listening socket
 	iResult = bind(this->m_ListnerSocket, result->ai_addr, (int)result->ai_addrlen);
 
 	if (iResult == SOCKET_ERROR) {
@@ -82,27 +101,29 @@ int WinsocModule::Initialize()
 	// No longer need address information
 	freeaddrinfo(result);
 
-	// Start listening for new clients attempting to connect
-	iResult = listen(this->m_ListnerSocket, SOMAXCONN);
+	if (newProtocol == Protocol::TCP || newProtocol == Protocol::TCP_WITH_NODELAY)
+	{
+		// Start listening for new clients attempting to connect
+		iResult = listen(this->m_ListnerSocket, SOMAXCONN);
 
-	if (iResult == SOCKET_ERROR) {
-		printf("listen failed with error: %d\n", WSAGetLastError());
-		closesocket(this->m_ListnerSocket);
-		WSACleanup();
-		return 0;
+		if (iResult == SOCKET_ERROR) {
+			printf("listen failed with error: %d\n", WSAGetLastError());
+			closesocket(this->m_ListnerSocket);
+			WSACleanup();
+			return 0;
+		}
 	}
 
 	this->GetMyIp();
+	this->m_CurrentProtocol = newProtocol;
 
-	printf("Network module Initialized\n");
+	printf("Network module Initialized with type %d protocol\n", this->m_CurrentProtocol);
 
 	return 1;
 }
 
-void WinsocModule::Shutdown()
+int WinsocModule::Shutdown()
 {
-	int result = 0;
-
 	if (this->m_ListnerSocket != INVALID_SOCKET) {
 		closesocket(this->m_ListnerSocket);
 		WSACleanup();
@@ -112,21 +133,18 @@ void WinsocModule::Shutdown()
 		closesocket(this->m_ConnectionSocket);
 		WSACleanup();
 	}
-
-	if (result == 0)
-	{
-		printf("Shutdown Completed");
-	}
-	else
-	{
-		printf("Shutdown Failed, %d Sockets failed to shut down", result);
-	}
-
+	
+	this->m_CurrentProtocol = Protocol::NONE;
+	return 0;
 }
 
 void WinsocModule::Update()
 {
-	this->AcceptNewClient();				// Get any new clients
+	if (this->m_CurrentProtocol == Protocol::TCP || this->m_CurrentProtocol == Protocol::TCP_WITH_NODELAY)
+	{
+		this->AcceptNewClient();				// Get any new clients
+	}
+		
 	this->ReadMessagesFromClients();		//Read messages
 }
 
@@ -136,7 +154,7 @@ int WinsocModule::Connect(char * ip)
 	addrinfo *ptr = NULL;
 	addrinfo hints;
 
-	if (this->my_ip == ip)	//if my_ip is the same as the ip we try to connect to
+	if (this->m_IP == ip)	//if my_ip is the same as the ip we try to connect to
 	{
 		printf("Cannot connect to %s as it is this machines local ip\n", ip);
 		return 0;
@@ -144,11 +162,27 @@ int WinsocModule::Connect(char * ip)
 	else
 	{
 		ZeroMemory(&hints, sizeof(hints));	// Empties hint
-		hints.ai_family = AF_UNSPEC;		// The address family is unspecified
-		hints.ai_socktype = SOCK_STREAM;	// Provides sequenced, reliable, two-way, connection-based byte streams with an OOB data transmission mechanism
-		hints.ai_protocol = IPPROTO_TCP;	// Set to use TCP
-
-											// Resolve the server address and port
+		
+		if (this->m_CurrentProtocol == Protocol::TCP || this->m_CurrentProtocol == Protocol::TCP_WITH_NODELAY)
+		{
+			hints.ai_family = AF_INET;			// The Internet Protocol version 4 (IPv4) address family
+			hints.ai_socktype = SOCK_STREAM;	// Provides sequenced, reliable, two-way, connection-based byte streams with an OOB data transmission mechanism
+			hints.ai_protocol = IPPROTO_TCP;    // Set to use TCP
+		}
+		else if (this->m_CurrentProtocol == Protocol::UDP)
+		{
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_protocol = IPPROTO_UDP;
+		}
+		else
+		{
+			printf("Unknown Protocol");
+			WSACleanup();
+			return 0;
+		}
+		
+		// Resolve the server address and port
 		int iResult = getaddrinfo(ip, DEFAULT_PORT, &hints, &result);
 
 		if (iResult != 0)
@@ -242,11 +276,15 @@ bool WinsocModule::AcceptNewClient()
 
 	if (otherClientSocket != INVALID_SOCKET)
 	{
-		// Disable the nagle effect on the client's socket
-		char value = 1;
-		setsockopt(otherClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));	//TCP Options
 
-		this->m_ConnectionSocket = otherClientSocket;																		// Insert new client into session id table 
+		if (this->m_CurrentProtocol == Protocol::TCP_WITH_NODELAY)
+		{
+			// Disable the nagle effect on the client's socket
+			char value = 1;
+			setsockopt(otherClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));	//TCP Options
+		}
+
+		this->m_ConnectionSocket = otherClientSocket;
 		printf("client %d has been connected to the server\n", this->m_ClientID);
 		this->m_ClientID++;
 
@@ -283,10 +321,26 @@ void WinsocModule::ReadMessagesFromClients()
 
 		switch (header)
 		{
+			
+		case CONNECTION_REQUEST :
+			p.deserialize(&network_data[data_read]);
+			data_read += sizeof(Packet);
 
-			default:
-				printf("Unkown packet type %d\n", header);
-				data_read = data_length;	//Break
+			printf("Recived CONNECTION_REQUEST Packet");
+			this->SendPacket(PacketHeader::TEST);
+
+		case TEST :
+			p.deserialize(&network_data[data_read]);
+			data_read += sizeof(Packet);
+			
+			printf("Recived Test Packet %d", p.packet_ID);
+			this->SendPacket(PacketHeader::TEST);
+
+			
+
+		default:
+			printf("Unkown packet type %d\n", header);
+			data_read = data_length;	//Break
 		}
 
 	}
@@ -323,7 +377,21 @@ int WinsocModule::GetMyIp()
 	std::stringstream ss;
 	ss << (int)b1 << "." << (int)b2 << "." << (int)b3 << "." << (int)b4;
 
-	this->my_ip.append(ss.str());	// Set my_ip to the local ip-address of the machine
+	this->m_IP.append(ss.str());	// Set my_ip to the local ip-address of the machine
 
 	return 1;
+}
+
+void WinsocModule::SendPacket(PacketHeader headertype)
+{
+	const unsigned int packet_size = sizeof(Packet);
+	char packet_data[packet_size];
+
+	Packet packet;
+	packet.packet_type = headertype;
+	packet.packet_ID = this->m_PacketID++;
+
+	packet.serialize(packet_data);
+	
+	NetworkService::sendMessage(this->m_ConnectionSocket, packet_data, packet_size);
 }

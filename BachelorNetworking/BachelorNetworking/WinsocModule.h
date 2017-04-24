@@ -27,7 +27,9 @@ private:
 
 	int			m_ClientID;
 	int			m_PacketID;
-	std::string	my_ip;
+	std::string	m_IP;
+
+	Protocol m_CurrentProtocol;
 
 public:
 
@@ -40,10 +42,12 @@ public:
 	WinsocModule();
 	~WinsocModule();
 
-	int		Initialize();
+	int		Initialize(Protocol newProtocol);
 	int		Shutdown();
 	void	Update();
 	int		Connect(char* ip);
+
+	void	SendPacket(PacketHeader headertype);
 };
 
 #endif;

@@ -6,8 +6,15 @@
 #include <string>
 
 enum PacketHeader {
-	DEFUALT = 0,
+	TEST = 0,
 	CONNECTION_REQUEST,
+};
+
+enum Protocol {
+	NONE = 0,
+	TCP,
+	TCP_WITH_NODELAY,
+	UDP,
 };
 
 struct Packet
