@@ -99,9 +99,29 @@ int WinsocModule::Initialize()
 	return 1;
 }
 
-int WinsocModule::Shutdown()
+void WinsocModule::Shutdown()
 {
-	return 0;
+	int result = 0;
+
+	if (this->m_ListnerSocket != INVALID_SOCKET) {
+		closesocket(this->m_ListnerSocket);
+		WSACleanup();
+	}
+
+	if (this->m_ConnectionSocket != INVALID_SOCKET) {
+		closesocket(this->m_ConnectionSocket);
+		WSACleanup();
+	}
+
+	if (result == 0)
+	{
+		printf("Shutdown Completed");
+	}
+	else
+	{
+		printf("Shutdown Failed, %d Sockets failed to shut down", result);
+	}
+
 }
 
 void WinsocModule::Update()
