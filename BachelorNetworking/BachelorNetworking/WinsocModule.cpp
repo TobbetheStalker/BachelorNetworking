@@ -92,13 +92,13 @@ int WinsocModule::Connect(char * ip)
 	addrinfo *ptr = NULL;
 	addrinfo hints;
 
-	if (this->m_IP == ip)	//if my_ip is the same as the ip we try to connect to
-	{
-		printf("Cannot connect to %s as it is this machines local ip\n", ip);
-		return 0;
-	}
-	else
-	{
+	//if (this->m_IP == ip)	//if my_ip is the same as the ip we try to connect to
+	//{
+	//	printf("Cannot connect to %s as it is this machines local ip\n", ip);
+	//	return 0;
+	//}
+	//else
+	//{
 		ZeroMemory(&hints, sizeof(hints));	// Empties hint
 		
 		if (this->m_CurrentProtocol == Protocol::TCP || this->m_CurrentProtocol == Protocol::TCP_WITH_NODELAY)
@@ -198,11 +198,11 @@ int WinsocModule::Connect(char * ip)
 		// Add the host to connectedClients before getting a CONNECTION_ACCEPTED back 
 		// since we need to know which client to listen for
 		this->m_ListnerSocket = this->m_ConnectionSocket;
-		printf("client %d has been connected to the this client\n", this->m_ClientID);
+		printf("Listner socket has been set to listen to same address as the Connection socket \n");
 		this->m_ClientID++;
 
 		return 1;
-	}
+	//}
 
 }
 
@@ -420,8 +420,6 @@ int WinsocModule::Initialize_TCP(bool noDelay)
 
 int WinsocModule::Initialize_UDP()
 {
-	printf("Initializing Network module... \n");
-
 	WSADATA wsaData;						// Create WSADATA object
 	this->m_ListnerSocket = INVALID_SOCKET;	// The socket that will listen
 	int iResult;
