@@ -426,7 +426,6 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
 	{
 		printf("sendto() failed with error code : %d", WSAGetLastError());
-		exit(EXIT_FAILURE);
 	}
 }
 
