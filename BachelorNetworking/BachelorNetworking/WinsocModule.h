@@ -22,8 +22,9 @@ class WinsocModule
 {
 
 private:
-	SOCKET	m_ListnerSocket;
-	SOCKET	m_ConnectionSocket;
+	SOCKET	m_TCP_ListnerSocket;
+	SOCKET	m_TCP_ConnectionSocket;
+	SOCKET	m_UDP_Socket;
 
 	int			m_ClientID;
 	int			m_PacketID;
@@ -48,7 +49,9 @@ public:
 	int		Initialize(Protocol newProtocol);
 	int		Shutdown();
 	void	Update();
-	int		Connect(char* ip);
+	void	TCP_Update();
+	void	UDP_Update();
+	int		TCP_Connect(char* ip);
 
 	void	SendPacket(PacketHeader headertype);
 };
