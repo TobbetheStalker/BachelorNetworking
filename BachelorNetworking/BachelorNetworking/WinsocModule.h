@@ -38,6 +38,9 @@ private:
 	void	ReadMessagesFromClients();
 	int		GetMyIp();
 
+	int		Initialize_TCP(bool noDelay);
+	int		Initialize_UDP();
+
 public:
 	WinsocModule();
 	~WinsocModule();
