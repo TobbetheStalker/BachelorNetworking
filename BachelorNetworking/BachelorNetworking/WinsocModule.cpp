@@ -407,9 +407,27 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 	NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
 }
 
-void WinsocModule::UDP_Send(PacketHeader headertype)
+void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 {
+	sockaddr_in RecvAddr;
+	const unsigned int packet_size = sizeof(Packet);
+	char packet_data[packet_size];
 
+	Packet packet;
+	packet.packet_type = headertype;
+	packet.packet_ID = this->m_PacketID++;
+
+	packet.serialize(packet_data);
+
+	RecvAddr.sin_family = AF_INET;
+	RecvAddr.sin_port = (int)DEFAULT_PORT;
+	RecvAddr.sin_addr.s_addr = inet_addr(ip);
+
+	if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+	{
+		printf("sendto() failed with error code : %d", WSAGetLastError());
+		exit(EXIT_FAILURE);
+	}
 }
 
 int WinsocModule::TCP_Initialize(bool noDelay)

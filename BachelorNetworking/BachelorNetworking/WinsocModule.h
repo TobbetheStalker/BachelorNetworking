@@ -54,7 +54,7 @@ public:
 	int		TCP_Connect(char* ip);
 
 	void	TCP_Send(PacketHeader headertype);
-	void	UDP_Send(PacketHeader headertype);
+	void	UDP_Send(PacketHeader headertype, char* ip);
 };
 
 #endif;
