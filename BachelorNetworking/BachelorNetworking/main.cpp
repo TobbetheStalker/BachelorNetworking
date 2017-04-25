@@ -7,7 +7,7 @@ int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
-	Protocol p = Protocol::UDP;
+	Protocol p = Protocol::TCP;
 	bool connect = false;
 	WinsocModule wsModule;
 	

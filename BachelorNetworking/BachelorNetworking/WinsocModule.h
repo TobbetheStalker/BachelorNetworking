@@ -39,8 +39,8 @@ private:
 	void	ReadMessagesFromClients();
 	int		GetMyIp();
 
-	int		Initialize_TCP(bool noDelay);
-	int		Initialize_UDP();
+	int		TCP_Initialize(bool noDelay);
+	int		UDP_Initialize();
 
 public:
 	WinsocModule();
@@ -53,7 +53,8 @@ public:
 	void	UDP_Update();
 	int		TCP_Connect(char* ip);
 
-	void	SendPacket(PacketHeader headertype);
+	void	TCP_Send(PacketHeader headertype);
+	void	UDP_Send(PacketHeader headertype);
 };
 
 #endif;

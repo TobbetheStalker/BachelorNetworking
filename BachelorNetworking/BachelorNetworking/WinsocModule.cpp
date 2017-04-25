@@ -30,7 +30,7 @@ int WinsocModule::Initialize(Protocol newProtocol)
 	//Chose what protocol to initialize the sockets with
 	if (newProtocol == Protocol::TCP)
 	{
-		if (this->Initialize_TCP(false))
+		if (this->TCP_Initialize(false))
 		{
 			//Success
 			this->m_CurrentProtocol = newProtocol;
@@ -44,7 +44,7 @@ int WinsocModule::Initialize(Protocol newProtocol)
 	}
 	else if (newProtocol == Protocol::TCP_WITH_NODELAY)
 	{
-		if (this->Initialize_TCP(true))
+		if (this->TCP_Initialize(true))
 		{
 			this->m_CurrentProtocol = newProtocol;
 			printf("Network module Initialized with type %d protocol\n", this->m_CurrentProtocol);
@@ -56,7 +56,7 @@ int WinsocModule::Initialize(Protocol newProtocol)
 	}
 	else if (newProtocol == Protocol::UDP)
 	{
-		if (this->Initialize_UDP())
+		if (this->UDP_Initialize())
 		{
 			this->m_CurrentProtocol = newProtocol;
 			printf("Network module Initialized with type %d protocol\n", this->m_CurrentProtocol);
@@ -82,6 +82,11 @@ int WinsocModule::Shutdown()
 		WSACleanup();
 	}
 	
+	if (this->m_UDP_Socket != INVALID_SOCKET) {
+		closesocket(this->m_UDP_Socket);
+		WSACleanup();
+	}
+
 	this->m_CurrentProtocol = Protocol::NONE;
 	return 0;
 }
@@ -100,12 +105,74 @@ void WinsocModule::Update()
 
 void WinsocModule::TCP_Update()
 {
+
+	printf("UPDATE_TCP");
+
 	this->AcceptNewClient();				// Get any new clients
 	this->ReadMessagesFromClients();		//Read messages
 }
 
 void WinsocModule::UDP_Update()
 {
+
+	printf("UPDATE_UDP");
+
+	struct sockaddr_in si_other;
+	int slen = sizeof(si_other);
+	int	data_length;
+	unsigned int header = -1;
+	char network_data[MAX_PACKET_SIZE];
+	int data_read = 0;
+	Packet p;
+
+	fflush(stdout);
+
+	//clear the buffer by filling null, it might have previously received data
+	memset(network_data, '\0', MAX_PACKET_SIZE);
+
+	//try to receive some data, this is a blocking call
+	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, MAX_PACKET_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
+	{
+		printf("recvfrom() failed with error code : %d", WSAGetLastError());
+		//exit(EXIT_FAILURE);
+	}
+
+	// If there was no data
+	if (data_length <= 0)
+	{
+		//No data recieved, end the function
+		return;
+	}
+
+	while (data_read != data_length)
+	{
+		//Read the header (skip the first 4 bytes since it is virtual function information)
+		memcpy(&header, &network_data[data_read + PACKETOFFSET], sizeof(PacketHeader));
+
+		switch (header)
+		{
+
+		case CONNECTION_REQUEST:
+			p.deserialize(&network_data[data_read]);
+			data_read += sizeof(Packet);
+
+			printf("Recived CONNECTION_REQUEST Packet");
+
+		case TEST:
+			p.deserialize(&network_data[data_read]);
+			data_read += sizeof(Packet);
+
+			printf("Recived Test Packet %d", p.packet_ID);
+
+
+
+		default:
+			printf("Unkown packet type %d\n", header);
+			data_read = data_length;	//Break
+		}
+
+	}
+
 }
 
 int WinsocModule::TCP_Connect(char * ip)
@@ -271,14 +338,14 @@ void WinsocModule::ReadMessagesFromClients()
 			data_read += sizeof(Packet);
 
 			printf("Recived CONNECTION_REQUEST Packet");
-			this->SendPacket(PacketHeader::TEST);
+			this->TCP_Send(PacketHeader::TEST);
 
 		case TEST :
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 			
 			printf("Recived Test Packet %d", p.packet_ID);
-			this->SendPacket(PacketHeader::TEST);
+			this->TCP_Send(PacketHeader::TEST);
 
 			
 
@@ -326,7 +393,7 @@ int WinsocModule::GetMyIp()
 	return 1;
 }
 
-void WinsocModule::SendPacket(PacketHeader headertype)
+void WinsocModule::TCP_Send(PacketHeader headertype)
 {
 	const unsigned int packet_size = sizeof(Packet);
 	char packet_data[packet_size];
@@ -340,7 +407,12 @@ void WinsocModule::SendPacket(PacketHeader headertype)
 	NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
 }
 
-int WinsocModule::Initialize_TCP(bool noDelay)
+void WinsocModule::UDP_Send(PacketHeader headertype)
+{
+
+}
+
+int WinsocModule::TCP_Initialize(bool noDelay)
 {
 	this->m_TCP_ListnerSocket = INVALID_SOCKET;	// The socket that will listen
 	int iResult;
@@ -416,7 +488,7 @@ int WinsocModule::Initialize_TCP(bool noDelay)
 	return 1;
 }
 
-int WinsocModule::Initialize_UDP()
+int WinsocModule::UDP_Initialize()
 {
 	sockaddr_in local;
 	int iResult;
