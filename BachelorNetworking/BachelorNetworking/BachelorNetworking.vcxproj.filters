@@ -19,15 +19,21 @@
     <Filter Include="Header Files\RakNet">
       <UniqueIdentifier>{4d0bdde4-df20-4db6-ad42-7b4ceecf10bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\WinsocModule">
+      <UniqueIdentifier>{2a2b2206-9e06-4b2a-92fe-1137b7bf44bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WinsocModule">
+      <UniqueIdentifier>{0c2b5dbd-3ab2-479b-99c0-3900725943a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RakNetModule">
+      <UniqueIdentifier>{d0c71617-b5e7-4b1f-801e-0b7c6e5daf7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RakNetModule">
+      <UniqueIdentifier>{16411243-4fad-497f-9ad9-8c155dbd02dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkService.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WinsocModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\RakNet\Source\_FindFirst.cpp">
@@ -360,17 +366,17 @@
     <ClCompile Include="..\RakNet\Source\WSAStartupSingleton.cpp">
       <Filter>Source Files\RakNet</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkService.cpp">
+      <Filter>Source Files\WinsocModule</Filter>
+    </ClCompile>
+    <ClCompile Include="WinsocModule.cpp">
+      <Filter>Source Files\WinsocModule</Filter>
+    </ClCompile>
+    <ClCompile Include="RakNetModule.cpp">
+      <Filter>Source Files\RakNetModule</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NetworkService.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WinsocModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\RakNet\Source\_FindFirst.h">
       <Filter>Header Files\RakNet</Filter>
     </ClInclude>
@@ -832,6 +838,18 @@
     </ClInclude>
     <ClInclude Include="..\RakNet\Source\DS_BinarySearchTree.h">
       <Filter>Header Files\RakNet</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkData.h">
+      <Filter>Header Files\WinsocModule</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkService.h">
+      <Filter>Header Files\WinsocModule</Filter>
+    </ClInclude>
+    <ClInclude Include="WinsocModule.h">
+      <Filter>Header Files\WinsocModule</Filter>
+    </ClInclude>
+    <ClInclude Include="RakNetModule.h">
+      <Filter>Header Files\RakNetModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

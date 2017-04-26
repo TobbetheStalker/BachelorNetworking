@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\RakNet\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\RakNet\Source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,7 +122,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\RakNet\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\RakNet\Source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -264,6 +264,7 @@
     <ClCompile Include="..\RakNet\Source\_FindFirst.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkService.cpp" />
+    <ClCompile Include="RakNetModule.cpp" />
     <ClCompile Include="WinsocModule.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -423,6 +424,7 @@
     <ClInclude Include="..\RakNet\Source\_FindFirst.h" />
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkService.h" />
+    <ClInclude Include="RakNetModule.h" />
     <ClInclude Include="WinsocModule.h" />
   </ItemGroup>
   <ItemGroup>
