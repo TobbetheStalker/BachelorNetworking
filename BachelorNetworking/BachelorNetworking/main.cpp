@@ -2,6 +2,7 @@
 #include <iostream>
 #include "WinsocModule.h"
 #include "RakNetModule.h"
+#include "pcap.h"
 
 int main()
 {
