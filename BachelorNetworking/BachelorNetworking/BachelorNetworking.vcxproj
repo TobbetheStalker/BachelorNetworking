@@ -264,6 +264,7 @@
     <ClCompile Include="..\RakNet\Source\_FindFirst.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkService.cpp" />
+    <ClCompile Include="PCapModule.cpp" />
     <ClCompile Include="RakNetModule.cpp" />
     <ClCompile Include="WinsocModule.cpp" />
   </ItemGroup>
@@ -424,6 +425,7 @@
     <ClInclude Include="..\RakNet\Source\_FindFirst.h" />
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkService.h" />
+    <ClInclude Include="PCapModule.h" />
     <ClInclude Include="RakNetModule.h" />
     <ClInclude Include="WinsocModule.h" />
   </ItemGroup>

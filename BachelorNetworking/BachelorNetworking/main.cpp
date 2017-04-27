@@ -2,7 +2,7 @@
 #include <iostream>
 #include "WinsocModule.h"
 #include "RakNetModule.h"
-#include "pcap.h"
+#include "PCapModule.h"
 
 int main()
 {
@@ -12,9 +12,12 @@ int main()
 	bool connect = false;
 	WinsocModule wsModule;
 	RakNetModule rnModule;
+	PCapModule pcModule;
+
+	pcModule.Initialize();
+	pcModule.Shutdown();
 	
 	//wsModule.Initialize(p);
-	
 	//while(true)
 	//{
 	//	wsModule.Update();
@@ -26,12 +29,10 @@ int main()
 	//	}
 	//}
 
-
 	//wsModule.Shutdown();
 	
-	rnModule.Initialize();
-
-	rnModule.Shutdown();
+	//rnModule.Initialize();
+	//rnModule.Shutdown();
 
 
 	printf("Ending program");

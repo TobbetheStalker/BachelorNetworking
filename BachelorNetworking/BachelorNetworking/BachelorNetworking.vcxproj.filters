@@ -31,6 +31,12 @@
     <Filter Include="Source Files\RakNetModule">
       <UniqueIdentifier>{16411243-4fad-497f-9ad9-8c155dbd02dc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\PCap">
+      <UniqueIdentifier>{b671c5e3-afac-49fe-9d12-d2370aff07b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PCap">
+      <UniqueIdentifier>{b9de6c55-5ff7-496a-bc24-219bf7adb34a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -374,6 +380,9 @@
     </ClCompile>
     <ClCompile Include="RakNetModule.cpp">
       <Filter>Source Files\RakNetModule</Filter>
+    </ClCompile>
+    <ClCompile Include="PCapModule.cpp">
+      <Filter>Source Files\PCap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -850,6 +859,9 @@
     </ClInclude>
     <ClInclude Include="RakNetModule.h">
       <Filter>Header Files\RakNetModule</Filter>
+    </ClInclude>
+    <ClInclude Include="PCapModule.h">
+      <Filter>Header Files\PCap</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
