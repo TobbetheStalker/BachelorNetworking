@@ -12,6 +12,7 @@ WinsocModule::WinsocModule()
 
 WinsocModule::~WinsocModule()
 {
+	this->Shutdown();
 }
 
 int WinsocModule::Initialize(Protocol newProtocol)
