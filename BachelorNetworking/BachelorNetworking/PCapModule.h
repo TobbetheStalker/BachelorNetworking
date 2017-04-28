@@ -18,6 +18,9 @@ public:
 	void Shutdown();
 
 	void PrintDevices();
+	void PrintDeviceInformation(pcap_if_t *d);
+	char* IpToString(u_long in);
+	char* Ip6ToString(struct sockaddr *sockaddr, char *address, int addrlen);
 };
 
 
