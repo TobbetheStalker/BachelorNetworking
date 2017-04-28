@@ -1,7 +1,7 @@
 //* Copyright(c) 1999 - 2005 NetGroup, Politecnico di Torino(Italy)
 //* Copyright(c) 2005 - 2006 CACE Technologies, Davis(California)
 //* All rights reserved.
-
+//Code Modified by Tobias Kling
 
 #include "PCapModule.h"
 
@@ -9,6 +9,8 @@ PCapModule::PCapModule()
 {
 	this->m_AllDevices = nullptr;
 	this->m_CurrentDevice = nullptr;
+
+	this->m_nrOfDevices = 0;
 }
 
 PCapModule::~PCapModule()
@@ -37,6 +39,8 @@ void PCapModule::Shutdown()
 	{
 		pcap_freealldevs(this->m_AllDevices);
 	}
+
+	this->m_nrOfDevices = 0;
 }
 
 void PCapModule::PrintDevices()
@@ -59,8 +63,9 @@ void PCapModule::PrintDevices()
 	if (i == 0)
 	{
 		printf("\nNo interfaces found! Make sure WinPcap is installed.\n");
-		return;
 	}
+
+	this->m_nrOfDevices = i;
 
 }
 
@@ -144,4 +149,21 @@ char * PCapModule::Ip6ToString(sockaddr * sockaddr, char * address, int addrlen)
 		NI_NUMERICHOST) != 0) address = NULL;
 
 	return address;
+}
+
+void PCapModule::SelectDevice(int deviceIndex)
+{
+	if (deviceIndex <= this->m_nrOfDevices && deviceIndex > 0)
+	{
+		this->m_CurrentDevice = this->m_AllDevices;
+		for (int i = 0; i < deviceIndex; i++)
+		{
+			this->m_CurrentDevice = this->m_CurrentDevice->next;
+			printf("Selected Device: %d \n", i+1);
+		}
+	}
+	else
+	{
+		printf("Invalid Index \n");
+	}
 }

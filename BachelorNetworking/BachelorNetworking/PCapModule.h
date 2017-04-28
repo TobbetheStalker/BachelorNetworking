@@ -10,6 +10,8 @@ private:
 	pcap_if_t* m_AllDevices;
 	pcap_if_t* m_CurrentDevice;
 
+	int m_nrOfDevices;
+
 public:
 	PCapModule();
 	~PCapModule();
@@ -21,6 +23,8 @@ public:
 	void PrintDeviceInformation(pcap_if_t *d);
 	char* IpToString(u_long in);
 	char* Ip6ToString(struct sockaddr *sockaddr, char *address, int addrlen);
+
+	void SelectDevice(int deviceIndex);
 };
 
 

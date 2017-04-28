@@ -15,6 +15,9 @@ int main()
 	PCapModule pcModule;
 
 	pcModule.Initialize();
+
+	//pcModule.SelectDevice(2);
+
 	pcModule.Shutdown();
 	
 	//wsModule.Initialize(p);
