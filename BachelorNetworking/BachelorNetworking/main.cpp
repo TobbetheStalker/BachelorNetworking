@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	
 	Protocol p = Protocol::TCP_WITH_NODELAY;
 	std::string filterString = "";
-	std::string filename = "packetData";
+	std::string filename = "packetData.pcap";
 
 	bool connect = false;
 	WinsocModule wsModule;

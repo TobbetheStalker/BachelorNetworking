@@ -39,7 +39,7 @@ public:
 
 	void SelectDevice(int deviceIndex);
 	int StartCapture(std::string filter, std::string filename);
-
+	int ShowDumpFile();
 };
 
 
