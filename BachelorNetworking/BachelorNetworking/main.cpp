@@ -16,7 +16,8 @@ int main()
 
 	pcModule.Initialize();
 
-	//pcModule.SelectDevice(2);
+	pcModule.SelectDevice(2);
+	pcModule.StartCapture();
 
 	pcModule.Shutdown();
 	

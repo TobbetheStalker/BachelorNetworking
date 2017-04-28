@@ -9,6 +9,7 @@ PCapModule::PCapModule()
 {
 	this->m_AllDevices = nullptr;
 	this->m_CurrentDevice = nullptr;
+	this->m_adHandle = nullptr;
 
 	this->m_nrOfDevices = 0;
 }
@@ -156,14 +157,60 @@ void PCapModule::SelectDevice(int deviceIndex)
 	if (deviceIndex <= this->m_nrOfDevices && deviceIndex > 0)
 	{
 		this->m_CurrentDevice = this->m_AllDevices;
-		for (int i = 0; i < deviceIndex; i++)
+		for (int i = 1; i < deviceIndex; i++)
 		{
-			this->m_CurrentDevice = this->m_CurrentDevice->next;
-			printf("Selected Device: %d \n", i+1);
+			this->m_CurrentDevice = this->m_CurrentDevice->next;		
 		}
+		printf("Selected Device: %d \n", deviceIndex);
 	}
 	else
 	{
 		printf("Invalid Index \n");
 	}
+}
+
+int PCapModule::StartCapture()
+{
+	char errbuf[PCAP_ERRBUF_SIZE];
+
+	/* Open the device */
+	if ((this->m_adHandle = pcap_open(this->m_CurrentDevice->name,          // name of the device
+		65536,            // portion of the packet to capture
+						  // 65536 guarantees that the whole packet will be captured on all the link layers
+		PCAP_OPENFLAG_PROMISCUOUS,    // promiscuous mode
+		1000,             // read timeout
+		NULL,             // authentication on the remote machine
+		errbuf            // error buffer
+	)) == NULL)
+	{
+		fprintf(stderr, "\nUnable to open the adapter. %s is not supported by WinPcap\n", this->m_CurrentDevice->name);
+
+		return 0;
+	}
+
+	printf("\nlistening on %s...\n", this->m_CurrentDevice->description);
+
+	/* start the capture */
+	pcap_loop(this->m_adHandle, 0, Packet_Callback, NULL);
+
+	return 1;
+}
+
+void Packet_Callback(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data)
+{
+	//What to do when a packet comes through the device
+
+	struct tm ltime;
+	char timestr[16];
+	time_t local_tv_sec;
+
+	(VOID)(param);
+	(VOID)(pkt_data);
+
+	/* convert the timestamp to readable format */
+	local_tv_sec = header->ts.tv_sec;
+	localtime_s(&ltime, &local_tv_sec);
+	strftime(timestr, sizeof timestr, "%H:%M:%S", &ltime);
+
+	printf("%s,%.6d len:%d\n", timestr, header->ts.tv_usec, header->len);
 }

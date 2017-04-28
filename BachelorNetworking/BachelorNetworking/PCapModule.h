@@ -3,12 +3,17 @@
 
 #include "pcap.h"
 
+//Function created problem while a member of the class
+void Packet_Callback(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
+
 class PCapModule
 {
 
 private:
 	pcap_if_t* m_AllDevices;
 	pcap_if_t* m_CurrentDevice;
+
+	pcap_t* m_adHandle;
 
 	int m_nrOfDevices;
 
@@ -25,6 +30,8 @@ public:
 	char* Ip6ToString(struct sockaddr *sockaddr, char *address, int addrlen);
 
 	void SelectDevice(int deviceIndex);
+	int StartCapture();
+
 };
 
 
