@@ -169,7 +169,7 @@ void PCapModule::SelectDevice(int deviceIndex)
 	}
 }
 
-int PCapModule::StartCapture()
+int PCapModule::StartCapture(std::string filter)
 {
 	char errbuf[PCAP_ERRBUF_SIZE];
 
@@ -188,10 +188,56 @@ int PCapModule::StartCapture()
 		return 0;
 	}
 
+	this->SetFilter(filter);
+
 	printf("\nlistening on %s...\n", this->m_CurrentDevice->description);
 
 	/* start the capture */
 	pcap_loop(this->m_adHandle, 0, Packet_Callback, NULL);
+
+	return 1;
+}
+
+int PCapModule::SetFilter(std::string filter)
+{
+	struct bpf_program fcode;
+	u_int netmask;
+
+	if (pcap_datalink(this->m_adHandle) != DLT_EN10MB)
+	{
+		fprintf(stderr, "\nThis program works only on Ethernet networks.\n");
+		return 0;
+	}
+
+	if (this->m_CurrentDevice->addresses != NULL)
+	{
+		/* Retrieve the mask of the first address of the interface */
+		netmask = ((struct sockaddr_in *)(this->m_CurrentDevice->addresses->netmask))->sin_addr.S_un.S_addr;
+	}
+	else
+	{
+		/* If the interface is without an address we suppose to be in a C class network */
+		netmask = 0xffffff;
+	}
+
+
+	//compile the filter
+	if (pcap_compile(this->m_adHandle, &fcode, filter.c_str(), 1, netmask) < 0)
+	{
+		fprintf(stderr, "\nUnable to compile the packet filter. Check the syntax.\n");
+		/* Free the device list */
+		pcap_freealldevs(this->m_AllDevices);
+		return 0;
+	}
+
+	//set the filter
+	if (pcap_setfilter(this->m_adHandle, &fcode) < 0)
+	{
+		fprintf(stderr, "\nError setting the filter.\n");
+		/* Free the device list */
+		pcap_freealldevs(this->m_AllDevices);
+		return 0;
+	}
 
 	return 1;
 }
