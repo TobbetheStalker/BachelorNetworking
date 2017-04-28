@@ -35,7 +35,7 @@ int main()
 		}
 	}
 
-	//wsModule.Shutdown();
+	wsModule.Shutdown();
 	
 	//rnModule.Initialize();
 	//rnModule.Shutdown();

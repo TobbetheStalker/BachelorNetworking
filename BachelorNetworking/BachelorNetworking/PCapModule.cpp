@@ -16,6 +16,7 @@ PCapModule::PCapModule()
 
 PCapModule::~PCapModule()
 {
+	this->Shutdown();
 }
 
 int PCapModule::Initialize()
@@ -39,6 +40,19 @@ void PCapModule::Shutdown()
 	if (this->m_AllDevices != nullptr)
 	{
 		pcap_freealldevs(this->m_AllDevices);
+		delete this->m_AllDevices;
+		this->m_AllDevices = nullptr;
+	}
+	if (this->m_CurrentDevice != nullptr)
+	{
+		pcap_freealldevs(this->m_CurrentDevice);
+		delete this->m_CurrentDevice;
+		this->m_CurrentDevice = nullptr;
+	}
+	if (this->m_adHandle != nullptr)
+	{
+		delete this->m_adHandle;
+		this->m_adHandle = nullptr;
 	}
 
 	this->m_nrOfDevices = 0;
