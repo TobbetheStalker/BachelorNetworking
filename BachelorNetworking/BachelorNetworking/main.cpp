@@ -4,12 +4,13 @@
 #include "RakNetModule.h"
 #include "PCapModule.h"
 
-int main()
+int main(int argc, char **argv)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
 	Protocol p = Protocol::TCP_WITH_NODELAY;
-	std::string filterString = "port 6881";
+	std::string filterString = "";
+	std::string filename = "packetData";
 
 	bool connect = false;
 	WinsocModule wsModule;
@@ -19,23 +20,23 @@ int main()
 	pcModule.Initialize();
 
 	pcModule.SelectDevice(2);
-	pcModule.StartCapture(filterString);
+	pcModule.StartCapture(filterString, filename);
 
 	
 	
-	wsModule.Initialize(p);
-	while(true)
-	{
-		wsModule.Update();
-		//wsModule.UDP_Send(TEST, "192.168.99.6");
-		if (connect == false && p != Protocol::UDP)
-		{
-			wsModule.TCP_Connect("127.0.0.1");
-			connect = true;
-		}
-	}
+	//wsModule.Initialize(p);
+	//while(true)
+	//{
+	//	wsModule.Update();
+	//	//wsModule.UDP_Send(TEST, "192.168.99.6");
+	//	if (connect == false && p != Protocol::UDP)
+	//	{
+	//		wsModule.TCP_Connect("127.0.0.1");
+	//		connect = true;
+	//	}
+	//}
 
-	wsModule.Shutdown();
+	//wsModule.Shutdown();
 	
 	//rnModule.Initialize();
 	//rnModule.Shutdown();

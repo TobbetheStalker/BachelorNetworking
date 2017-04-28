@@ -18,6 +18,8 @@ private:
 
 	pcap_t* m_adHandle;
 
+	pcap_dumper_t* m_dumpfile;
+
 	int m_nrOfDevices;
 
 private:
@@ -36,7 +38,7 @@ public:
 	char* Ip6ToString(struct sockaddr *sockaddr, char *address, int addrlen);
 
 	void SelectDevice(int deviceIndex);
-	int StartCapture(std::string filter);
+	int StartCapture(std::string filter, std::string filename);
 
 };
 

@@ -10,7 +10,7 @@ PCapModule::PCapModule()
 	this->m_AllDevices = nullptr;
 	this->m_CurrentDevice = nullptr;
 	this->m_adHandle = nullptr;
-
+	this->m_dumpfile = nullptr;
 	this->m_nrOfDevices = 0;
 }
 
@@ -54,6 +54,12 @@ void PCapModule::Shutdown()
 		delete this->m_adHandle;
 		this->m_adHandle = nullptr;
 	}
+	if (this->m_dumpfile != nullptr)
+	{
+		delete this->m_dumpfile;
+		this->m_dumpfile = nullptr;
+	}
+
 
 	this->m_nrOfDevices = 0;
 }
@@ -183,8 +189,9 @@ void PCapModule::SelectDevice(int deviceIndex)
 	}
 }
 
-int PCapModule::StartCapture(std::string filter)
+int PCapModule::StartCapture(std::string filter, std::string filename)
 {
+	
 	char errbuf[PCAP_ERRBUF_SIZE];
 
 	/* Open the device */
@@ -204,10 +211,19 @@ int PCapModule::StartCapture(std::string filter)
 
 	this->SetFilter(filter);
 
-	printf("\nlistening on %s...\n", this->m_CurrentDevice->description);
+	/* Open the dump file */
+	this->m_dumpfile = pcap_dump_open(this->m_adHandle, filename.c_str());
 
+	if (this->m_dumpfile == NULL)
+	{
+		fprintf(stderr, "\nError opening output file\n");
+		return 0;
+	}
+
+	printf("\nlistening on %s\n", this->m_CurrentDevice->description);
+	printf("\Press Ctrl+C to stop...\n", this->m_CurrentDevice->description);
 	/* start the capture */
-	pcap_loop(this->m_adHandle, 0, Packet_Callback, NULL);
+	pcap_loop(this->m_adHandle, 0, Packet_Callback, (unsigned char*)this->m_dumpfile);
 
 	return 1;
 }
@@ -256,7 +272,7 @@ int PCapModule::SetFilter(std::string filter)
 	return 1;
 }
 
-void Packet_Callback(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data)
+void Packet_Callback(u_char *dumpfile, const struct pcap_pkthdr *header, const u_char *pkt_data)
 {
 	//What to do when a packet comes through the device
 
@@ -264,7 +280,7 @@ void Packet_Callback(u_char *param, const struct pcap_pkthdr *header, const u_ch
 	char timestr[16];
 	time_t local_tv_sec;
 
-	(VOID)(param);
+	(VOID)(dumpfile);
 	(VOID)(pkt_data);
 
 	/* convert the timestamp to readable format */
@@ -273,4 +289,9 @@ void Packet_Callback(u_char *param, const struct pcap_pkthdr *header, const u_ch
 	strftime(timestr, sizeof timestr, "%H:%M:%S", &ltime);
 
 	printf("%s,%.6d len:%d\n", timestr, header->ts.tv_usec, header->len);
+	
+	
+	/* save the packet on the dump file */
+	pcap_dump(dumpfile, header, pkt_data);
+
 }
