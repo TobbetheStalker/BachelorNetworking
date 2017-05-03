@@ -15,12 +15,8 @@ int main(int argc, char **argv)
 	bool connect = false;
 	WinsocModule wsModule;
 	RakNetModule rnModule;
-	PCapModule pcModule;
 
-	pcModule.Initialize();
 
-	pcModule.SelectDevice(2);
-	pcModule.StartCapture(filterString, filename);
 
 	
 	
@@ -40,8 +36,6 @@ int main(int argc, char **argv)
 	
 	//rnModule.Initialize();
 	//rnModule.Shutdown();
-
-	pcModule.Shutdown();
 
 	printf("Ending program \n");
 

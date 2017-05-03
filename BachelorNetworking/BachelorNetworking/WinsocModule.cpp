@@ -8,6 +8,7 @@ WinsocModule::WinsocModule()
 	this->m_PacketID = 0;
 
 	this->m_CurrentProtocol = Protocol::NONE;
+	this->m_ping_in_progress = false;
 }
 
 WinsocModule::~WinsocModule()
@@ -67,6 +68,8 @@ int WinsocModule::Initialize(Protocol newProtocol)
 			printf("Network module Initialization FAILED with type %d protocol\n", this->m_CurrentProtocol);
 		}
 	}
+
+	this->m_original_time = std::chrono::time_point<std::chrono::system_clock>::clock::now();
 
 	return 1;
 }
@@ -314,6 +317,7 @@ void WinsocModule::ReadMessagesFromClients()
 
 	// The objects to load the data into
 	Packet p;
+	SyncPacket sp;
 
 	//Check if there is data
 	int data_length = NetworkService::receiveMessage(this->m_TCP_ListnerSocket, network_data, MAX_PACKET_SIZE);
@@ -334,6 +338,20 @@ void WinsocModule::ReadMessagesFromClients()
 		switch (header)
 		{
 			
+		case CLOCK_SYNC :
+			//Resend a PING_RESPONSE
+			this->TCP_Send(CLOCK_SYNC_RESPONSE);
+
+			data_read += sizeof(Packet);
+
+		case CLOCK_SYNC_RESPONSE:
+			sp.deserialize(&network_data[data_read]);
+
+			this->m_original_time = sp.m_original_time;
+			this->Clock_Stop();
+
+			data_read += sizeof(Packet);
+
 		case CONNECTION_REQUEST :
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
@@ -396,16 +414,34 @@ int WinsocModule::GetMyIp()
 
 void WinsocModule::TCP_Send(PacketHeader headertype)
 {
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
+	if (headertype == CLOCK_SYNC_RESPONSE)
+	{
+		const unsigned int packet_size = sizeof(SyncPacket);
+		char packet_data[packet_size];
 
-	Packet packet;
-	packet.packet_type = headertype;
-	packet.packet_ID = this->m_PacketID++;
+		SyncPacket packet;
+		packet.packet_type = headertype;
+		packet.packet_ID = this->m_PacketID++;
+		packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
+		packet.m_original_time = this->m_original_time;
 
-	packet.serialize(packet_data);
+		packet.serialize(packet_data);
+		NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+	}
+	else
+	{
+		const unsigned int packet_size = sizeof(Packet);
+		char packet_data[packet_size];
+
+		Packet packet;
+		packet.packet_type = headertype;
+		packet.packet_ID = this->m_PacketID++;
+		packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
+
+		packet.serialize(packet_data);
+		NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+	}
 	
-	NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
 }
 
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
@@ -428,6 +464,56 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	{
 		printf("sendto() failed with error code : %d", WSAGetLastError());
 	}
+}
+
+float WinsocModule::GetAvrgRTT()
+{
+	float result = 0;
+	int count = 0;
+	std::vector<int>::iterator itr;
+
+	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();) 
+	{
+		result += *itr._Ptr;
+		count++;
+	}
+
+	result = result / count;
+
+	return result;
+}
+
+void WinsocModule::Sync_Clocks()
+{
+	/*
+	1. Start a timer to measure teh RTT
+	2. Send a CLOCK_SYNC packet which will trigger the reciver to send back a CLOCK_SYNC_RESPONSE packet 
+	with their original time
+	3. Wait for the packet to arrive
+	4. Set our own orginal clock to the time recived in the packet
+	5. Repeat three times to get more RTT values for an average 
+	6. Calculate the average RTT
+	7. Add half of RTT to our original clock to compensate for the travel time from the other client 
+	back to us	
+	*/
+	for (int i = 0; i < 3; i++)
+	{
+		//Start the clock
+		this->Clock_Start();
+		//Send the packet
+		this->TCP_Send(CLOCK_SYNC);
+
+		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
+		while (this->m_ping_in_progress)
+		{
+			this->ReadMessagesFromClients();
+		}
+
+	}
+
+	int rtt = this->GetAvrgRTT(); //nano-seconds
+
+	this->m_original_time + std::chrono::nanoseconds(rtt/2);
 }
 
 int WinsocModule::TCP_Initialize(bool noDelay)
@@ -532,3 +618,33 @@ int WinsocModule::UDP_Initialize()
 
 	return 1;
 }
+
+void WinsocModule::Clock_Start()
+{
+	// Set current time
+	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+
+	// Set to not send more pings since it will disrupt the timers
+	this->m_ping_in_progress = true;
+}
+
+int WinsocModule::Clock_Stop()
+{
+	int result = 0;
+	
+	//Get the end time
+	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+
+	//Calculate the delta time togheter with end and start time to nano-seconds
+	result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
+
+	//Push back the result
+	this->m_ping_times.push_back(result);
+
+	//Set piong in progress to false
+	this->m_ping_in_progress = false;
+
+	return result;
+}
+
+

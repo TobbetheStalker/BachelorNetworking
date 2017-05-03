@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <sstream>
 #include <ws2tcpip.h>
+#include <vector>
 #include "NetworkData.h"
 #include "NetworkService.h"
 
@@ -33,6 +34,11 @@ private:
 
 	Protocol m_CurrentProtocol;
 
+	std::chrono::time_point<std::chrono::system_clock> m_original_time;
+	std::chrono::time_point<std::chrono::steady_clock> m_start_time;
+	std::vector<int>	m_ping_times;
+	bool				m_ping_in_progress;
+
 public:
 
 private:
@@ -42,6 +48,10 @@ private:
 
 	int		TCP_Initialize(bool noDelay);
 	int		UDP_Initialize();
+
+	void	Clock_Start();
+	int		Clock_Stop();
+	float	GetAvrgRTT();
 
 public:
 	WinsocModule();
@@ -56,6 +66,8 @@ public:
 
 	void	TCP_Send(PacketHeader headertype);
 	void	UDP_Send(PacketHeader headertype, char* ip);
+	
+	void	Sync_Clocks();
 };
 
 #endif;
