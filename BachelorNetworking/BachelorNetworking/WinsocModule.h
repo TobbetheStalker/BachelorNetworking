@@ -34,10 +34,10 @@ private:
 
 	Protocol m_CurrentProtocol;
 
-	std::chrono::time_point<std::chrono::system_clock> m_original_time;
 	std::chrono::time_point<std::chrono::steady_clock> m_start_time;
 	std::vector<int>	m_ping_times;
 	bool				m_ping_in_progress;
+	int					m_Avg_Delay;
 
 public:
 
