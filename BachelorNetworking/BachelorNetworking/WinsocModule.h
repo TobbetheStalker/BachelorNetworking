@@ -67,7 +67,8 @@ public:
 	void	TCP_Send(PacketHeader headertype);
 	void	UDP_Send(PacketHeader headertype, char* ip);
 	
-	void	Sync_Clocks();
+	void	Sync_Clocks();	//TCP
+	void	Sync_Clocks(char* ip);	//UDP
 };
 
 #endif;

@@ -128,6 +128,7 @@ void WinsocModule::UDP_Update()
 	char network_data[MAX_PACKET_SIZE];
 	int data_read = 0;
 	Packet p;
+	SyncPacket sp;
 
 	fflush(stdout);
 
@@ -155,6 +156,20 @@ void WinsocModule::UDP_Update()
 
 		switch (header)
 		{
+
+		case CLOCK_SYNC:
+			//Resend a PING_RESPONSE
+			this->UDP_Send(CLOCK_SYNC_RESPONSE, inet_ntoa(si_other.sin_addr));
+
+			data_read += sizeof(Packet);
+
+		case CLOCK_SYNC_RESPONSE:
+			sp.deserialize(&network_data[data_read]);
+
+			this->m_original_time = sp.m_original_time;
+			this->Clock_Stop();
+
+			data_read += sizeof(SyncPacket);
 
 		case CONNECTION_REQUEST:
 			p.deserialize(&network_data[data_read]);
@@ -350,7 +365,7 @@ void WinsocModule::ReadMessagesFromClients()
 			this->m_original_time = sp.m_original_time;
 			this->Clock_Stop();
 
-			data_read += sizeof(Packet);
+			data_read += sizeof(SyncPacket);
 
 		case CONNECTION_REQUEST :
 			p.deserialize(&network_data[data_read]);
@@ -447,23 +462,51 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 {
 	sockaddr_in RecvAddr;
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
-
-	Packet packet;
-	packet.packet_type = headertype;
-	packet.packet_ID = this->m_PacketID++;
-
-	packet.serialize(packet_data);
-
 	RecvAddr.sin_family = AF_INET;
 	RecvAddr.sin_port = (int)DEFAULT_PORT;
 	RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
-	if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+	if (headertype == CLOCK_SYNC_RESPONSE)
 	{
-		printf("sendto() failed with error code : %d", WSAGetLastError());
+		const unsigned int packet_size = sizeof(SyncPacket);
+		char packet_data[packet_size];
+
+		SyncPacket packet;
+		packet.packet_type = headertype;
+		packet.packet_ID = this->m_PacketID++;
+		packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
+		packet.m_original_time = this->m_original_time;
+
+		packet.serialize(packet_data);
+		NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+	
+		if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+		{
+			printf("sendto() failed with error code : %d", WSAGetLastError());
+		}
 	}
+	else
+	{
+		const unsigned int packet_size = sizeof(Packet);
+		char packet_data[packet_size];
+
+		Packet packet;
+		packet.packet_type = headertype;
+		packet.packet_ID = this->m_PacketID++;
+		packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
+
+		packet.serialize(packet_data);
+		NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+	
+		if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+		{
+			printf("sendto() failed with error code : %d", WSAGetLastError());
+		}
+	}
+
+	
+	
+	
 }
 
 float WinsocModule::GetAvrgRTT()
@@ -496,10 +539,15 @@ void WinsocModule::Sync_Clocks()
 	7. Add half of RTT to our original clock to compensate for the travel time from the other client 
 	back to us	
 	*/
+
+	//Clear any reamining times
+	this->m_ping_times.clear();
+
 	for (int i = 0; i < 3; i++)
 	{
 		//Start the clock
 		this->Clock_Start();
+
 		//Send the packet
 		this->TCP_Send(CLOCK_SYNC);
 
@@ -514,6 +562,44 @@ void WinsocModule::Sync_Clocks()
 	int rtt = this->GetAvrgRTT(); //nano-seconds
 
 	this->m_original_time + std::chrono::nanoseconds(rtt/2);
+}
+
+void WinsocModule::Sync_Clocks(char * ip)
+{
+	/*
+	1. Start a timer to measure teh RTT
+	2. Send a CLOCK_SYNC packet which will trigger the reciver to send back a CLOCK_SYNC_RESPONSE packet
+	with their original time
+	3. Wait for the packet to arrive
+	4. Set our own orginal clock to the time recived in the packet
+	5. Repeat three times to get more RTT values for an average
+	6. Calculate the average RTT
+	7. Add half of RTT to our original clock to compensate for the travel time from the other client
+	back to us
+	*/
+
+	//Clear any reamining times
+	this->m_ping_times.clear();
+
+	for (int i = 0; i < 3; i++)
+	{
+		//Start the clock
+		this->Clock_Start();
+
+		//Send the packet
+		this->UDP_Send(CLOCK_SYNC, ip);
+
+		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
+		while (this->m_ping_in_progress)
+		{
+			this->UDP_Update();
+		}
+
+	}
+
+	int rtt = this->GetAvrgRTT(); //nano-seconds
+
+	this->m_original_time + std::chrono::nanoseconds(rtt / 2);
 }
 
 int WinsocModule::TCP_Initialize(bool noDelay)
