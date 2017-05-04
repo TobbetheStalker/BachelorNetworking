@@ -67,8 +67,8 @@ public:
 	void	TCP_Send(PacketHeader headertype);
 	void	UDP_Send(PacketHeader headertype, char* ip);
 	
-	void	Sync_Clocks();	//TCP
-	void	Sync_Clocks(char* ip);	//UDP
+	void	Calculate_AVG_Delay();	//TCP
+	void	Calculate_AVG_Delay(char* ip);	//UDP
 };
 
 #endif;
