@@ -83,7 +83,7 @@ void RakNetModule::Update()
 
 		case CLOCK_SYNC:
 
-			this->Send(CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, UNRELIABLE);
+			this->Send(CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 
 		case CLOCK_SYNC_RESPONSE:
 
@@ -146,7 +146,7 @@ void RakNetModule::Calculate_AVG_Delay()
 		this->Clock_Start();
 
 		//Send the packet
-		this->Send(CLOCK_SYNC);
+		this->Send(CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
