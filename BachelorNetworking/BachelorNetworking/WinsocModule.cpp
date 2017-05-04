@@ -475,7 +475,7 @@ float WinsocModule::GetAvrgRTT()
 	return result;
 }
 
-void WinsocModule::Sync_Clocks()
+void WinsocModule::Calculate_AVG_Delay()
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -510,7 +510,7 @@ void WinsocModule::Sync_Clocks()
 
 }
 
-void WinsocModule::Sync_Clocks(char * ip)
+void WinsocModule::Calculate_AVG_Delay(char * ip)
 {
 	/*
 	1. Start a timer to measure teh RTT
