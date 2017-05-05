@@ -10,6 +10,8 @@ WinsocModule::WinsocModule()
 	this->m_CurrentProtocol = Protocol::NONE;
 	this->m_ping_in_progress = false;
 	this->m_Avg_Delay = 0;
+	this->isConnected = false;
+	this->tranferComplete = false;
 }
 
 WinsocModule::~WinsocModule()
@@ -80,8 +82,8 @@ int WinsocModule::Shutdown()
 		WSACleanup();
 	}
 
-	if (this->m_TCP_ConnectionSocket != INVALID_SOCKET) {
-		closesocket(this->m_TCP_ConnectionSocket);
+	if (this->m_TCP_SenderSocket != INVALID_SOCKET) {
+		closesocket(this->m_TCP_SenderSocket);
 		WSACleanup();
 	}
 	
@@ -109,7 +111,7 @@ void WinsocModule::Update()
 void WinsocModule::TCP_Update()
 {
 
-	printf("UPDATE_TCP");
+	//printf("UPDATE_TCP");
 
 	this->AcceptNewClient();				// Get any new clients
 	this->ReadMessagesFromClients();		//Read messages
@@ -117,8 +119,6 @@ void WinsocModule::TCP_Update()
 
 void WinsocModule::UDP_Update()
 {
-
-	printf("UPDATE_UDP");
 
 	struct sockaddr_in si_other;
 	int slen = sizeof(si_other);
@@ -136,7 +136,7 @@ void WinsocModule::UDP_Update()
 	//try to receive some data, this is a blocking call
 	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, MAX_PACKET_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
-		printf("recvfrom() failed with error code : %d", WSAGetLastError());
+		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
 		//exit(EXIT_FAILURE);
 	}
 
@@ -150,7 +150,7 @@ void WinsocModule::UDP_Update()
 	while (data_read != data_length)
 	{
 		//Read the header (skip the first 4 bytes since it is virtual function information)
-		memcpy(&header, &network_data[data_read + PACKETOFFSET], sizeof(PacketHeader));
+		memcpy(&header, &network_data[data_read + 8], sizeof(PacketHeader));
 
 		switch (header)
 		{
@@ -160,30 +160,39 @@ void WinsocModule::UDP_Update()
 			this->UDP_Send(CLOCK_SYNC_RESPONSE, inet_ntoa(si_other.sin_addr));
 
 			data_read += sizeof(Packet);
+			break;
 
 		case CLOCK_SYNC_RESPONSE:
 
 			this->Clock_Stop();
 
 			data_read += sizeof(Packet);
+			break;
 
 		case CONNECTION_REQUEST:
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
-			printf("Recived CONNECTION_REQUEST Packet");
+			printf("Recived CONNECTION_REQUEST Packet \n");
+			break;
 
 		case TEST:
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
-			printf("Recived Test Packet %d", p.packet_ID);
+			printf("Recived Test Packet %d \n", p.packet_ID);
+			this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
+			break;
 
-
+		case TRANSFER_COMPLETE:
+			data_read += sizeof(Packet);
+			this->tranferComplete = true;
+			break;
 
 		default:
 			printf("Unkown packet type %d\n", header);
-			data_read = data_length;	//Break
+			data_read = data_length;
+			break;
 		}
 
 	}
@@ -222,9 +231,9 @@ int WinsocModule::TCP_Connect(char * ip)
 		for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
 
 			// Set connectSocket to the host information
-			this->m_TCP_ConnectionSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+			this->m_TCP_SenderSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 
-			if (this->m_TCP_ConnectionSocket == INVALID_SOCKET) {
+			if (this->m_TCP_SenderSocket == INVALID_SOCKET) {
 				printf("socket failed with error: %ld\n", WSAGetLastError());
 				WSACleanup();
 				return 0;
@@ -234,12 +243,12 @@ int WinsocModule::TCP_Connect(char * ip)
 			iResult = SOCKET_ERROR;
 
 			// Try to connect to host. This may take up to 20 seconds
-			iResult = connect(this->m_TCP_ConnectionSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+			iResult = connect(this->m_TCP_SenderSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 
 			if (iResult == SOCKET_ERROR)
 			{
-				closesocket(this->m_TCP_ConnectionSocket);
-				this->m_TCP_ConnectionSocket = INVALID_SOCKET;
+				closesocket(this->m_TCP_SenderSocket);
+				this->m_TCP_SenderSocket = INVALID_SOCKET;
 				printf("The host %s is down... did not connect\n", ip);
 				return 0;
 			}
@@ -249,7 +258,7 @@ int WinsocModule::TCP_Connect(char * ip)
 		freeaddrinfo(result);
 
 		// If connection failed
-		if (this->m_TCP_ConnectionSocket == INVALID_SOCKET)
+		if (this->m_TCP_SenderSocket == INVALID_SOCKET)
 		{
 			printf("Unable to connect to server!\n");
 			WSACleanup();
@@ -259,11 +268,11 @@ int WinsocModule::TCP_Connect(char * ip)
 		// Set the mode of the socket to be nonblocking
 		u_long iMode = 1;
 
-		iResult = ioctlsocket(this->m_TCP_ConnectionSocket, FIONBIO, &iMode);
+		iResult = ioctlsocket(this->m_TCP_SenderSocket, FIONBIO, &iMode);
 		if (iResult == SOCKET_ERROR)
 		{
 			printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
-			closesocket(this->m_TCP_ConnectionSocket);
+			closesocket(this->m_TCP_SenderSocket);
 			WSACleanup();
 			return 0;
 		}
@@ -280,14 +289,14 @@ int WinsocModule::TCP_Connect(char * ip)
 		packet.serialize(packet_data);
 
 		// Send the packet directly to the host
-		NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, packet_data, packet_size);
 		printf("Sent CONNECTION_REQUEST to host\n");
 
 		// Add the host to connectedClients before getting a CONNECTION_ACCEPTED back 
 		// since we need to know which client to listen for
-		this->m_TCP_ListnerSocket = this->m_TCP_ConnectionSocket;
-		printf("Listner socket has been set to listen to same address as the Connection socket \n");
+		
 		this->m_ClientID++;
+		this->isConnected = true;
 
 		return 1;
 	//}
@@ -310,9 +319,10 @@ bool WinsocModule::AcceptNewClient()
 			setsockopt(otherClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));	//TCP Options
 		}
 
-		this->m_TCP_ConnectionSocket = otherClientSocket;
+		this->m_TCP_ConenctedSocket = otherClientSocket;
 		printf("client %d has been connected to the server\n", this->m_ClientID);
 		this->m_ClientID++;
+		this->isConnected = true;
 
 		return true;
 	}
@@ -330,7 +340,7 @@ void WinsocModule::ReadMessagesFromClients()
 	Packet p;
 
 	//Check if there is data
-	int data_length = NetworkService::receiveMessage(this->m_TCP_ListnerSocket, network_data, MAX_PACKET_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_ConenctedSocket, network_data, MAX_PACKET_SIZE);
 	int data_read = 0;
 
 	// If there was no data
@@ -342,8 +352,10 @@ void WinsocModule::ReadMessagesFromClients()
 	
 	while (data_read != data_length)
 	{
+		int x = sizeof(Packet);
+		int j = sizeof(std::chrono::time_point<std::chrono::system_clock>) + sizeof(PacketHeader) + sizeof(int);
 		//Read the header (skip the first 4 bytes since it is virtual function information)
-		memcpy(&header, &network_data[data_read + PACKETOFFSET], sizeof(PacketHeader));
+		memcpy(&header, &network_data[data_read + 8], sizeof(PacketHeader));
 
 		switch (header)
 		{
@@ -353,32 +365,39 @@ void WinsocModule::ReadMessagesFromClients()
 			this->TCP_Send(CLOCK_SYNC_RESPONSE);
 
 			data_read += sizeof(Packet);
+			break;
 
 		case CLOCK_SYNC_RESPONSE:
 			
 			this->Clock_Stop();
 
 			data_read += sizeof(Packet);
+			break;
 
 		case CONNECTION_REQUEST :
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
-			printf("Recived CONNECTION_REQUEST Packet");
-			this->TCP_Send(PacketHeader::TEST);
+			printf("Recived CONNECTION_REQUEST Packet \n");
+			break;
 
 		case TEST :
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 			
-			printf("Recived Test Packet %d", p.packet_ID);
-			this->TCP_Send(PacketHeader::TEST);
+			printf("Recived Test Packet %d \n", p.packet_ID);
+			this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
+			break;
 
-			
+		case TRANSFER_COMPLETE :
+			data_read += sizeof(Packet);
+			this->tranferComplete = true;
+			break;
 
 		default:
 			printf("Unkown packet type %d\n", header);
-			data_read = data_length;	//Break
+			data_read = data_length;
+			break;
 		}
 
 	}
@@ -431,14 +450,14 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 	packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
 
 	packet.serialize(packet_data);
-	NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+	NetworkService::sendMessage(this->m_TCP_SenderSocket, packet_data, packet_size);
 }
 
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 {
 	sockaddr_in RecvAddr;
 	RecvAddr.sin_family = AF_INET;
-	RecvAddr.sin_port = (int)DEFAULT_PORT;
+	RecvAddr.sin_port = 6881;
 	RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	const unsigned int packet_size = sizeof(Packet);
@@ -450,11 +469,11 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
 
 	packet.serialize(packet_data);
-	NetworkService::sendMessage(this->m_TCP_ConnectionSocket, packet_data, packet_size);
+	//NetworkService::sendMessage(this->m_UDP_Socket, packet_data, packet_size);
 	
 	if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
 	{
-		printf("sendto() failed with error code : %d", WSAGetLastError());
+		printf("sendto() failed with error code : %d \n", WSAGetLastError());
 	}
 }
 
@@ -468,6 +487,7 @@ float WinsocModule::GetAvrgRTT()
 	{
 		result += *itr._Ptr;
 		count++;
+		itr++;
 	}
 
 	result = result / count;
@@ -475,7 +495,7 @@ float WinsocModule::GetAvrgRTT()
 	return result;
 }
 
-void WinsocModule::Calculate_AVG_Delay()
+int WinsocModule::Calculate_AVG_Delay()
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -507,10 +527,11 @@ void WinsocModule::Calculate_AVG_Delay()
 	}
 
 	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
-
+	
+	return this->m_Avg_Delay;
 }
 
-void WinsocModule::Calculate_AVG_Delay(char * ip)
+int WinsocModule::Calculate_AVG_Delay(char * ip)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -542,6 +563,17 @@ void WinsocModule::Calculate_AVG_Delay(char * ip)
 	}
 
 	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
+	return this->m_Avg_Delay;
+}
+
+bool WinsocModule::GetIsConnected()
+{
+	return this->isConnected;
+}
+
+bool WinsocModule::GetTransferComplete()
+{
+	return this->tranferComplete;
 }
 
 int WinsocModule::TCP_Initialize(bool noDelay)
@@ -628,8 +660,8 @@ int WinsocModule::UDP_Initialize()
 	this->GetMyIp();//Set the local ip
 
 	local.sin_family = AF_INET;
-	local.sin_addr.s_addr = inet_addr(this->m_IP.c_str());
-	local.sin_port = (int)DEFAULT_PORT; // choose any
+	local.sin_addr.s_addr = INADDR_ANY;
+	local.sin_port = 6881; // choose any
 
 	// create the socket
 	this->m_UDP_Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);

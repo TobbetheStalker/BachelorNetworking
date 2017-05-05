@@ -4,6 +4,7 @@
 #include "MessageIdentifiers.h"
 #include "RakPeerInterface.h"
 #include "RakNetTypes.h"
+#include "MessageIdentifiers.h"
 #include "NetworkData.h"
 #include <vector>
 
@@ -19,12 +20,12 @@ private:
 	std::vector<int>	m_ping_times;
 	bool				m_ping_in_progress;
 	int					m_Avg_Delay;
+	bool				transferComplete;
 
 public:
 
 private:
-	void	Clock_Start();
-	int		Clock_Stop();
+
 	float	GetAvrgRTT();
 
 public:
@@ -37,9 +38,12 @@ public:
 	void Update();
 
 	bool Connect(char* ip);
-	void Send(PacketHeader headertype, PacketPriority priority, PacketReliability reliability);
+	void Send(DefaultMessageIDTypes id, PacketHeader headertype, PacketPriority priority, PacketReliability reliability);
 	
-	void	Calculate_AVG_Delay();	//TCP
+	int	Calculate_AVG_Delay();
+	void	Clock_Start();
+	int		Clock_Stop();
+	bool	GetTransferComplete();
 };
 
 #endif

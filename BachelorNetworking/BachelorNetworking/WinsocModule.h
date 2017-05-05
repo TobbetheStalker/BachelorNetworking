@@ -25,7 +25,8 @@ class WinsocModule
 
 private:
 	SOCKET	m_TCP_ListnerSocket;
-	SOCKET	m_TCP_ConnectionSocket;
+	SOCKET	m_TCP_SenderSocket;
+	SOCKET	m_TCP_ConenctedSocket;	//TEMP
 	SOCKET	m_UDP_Socket;
 
 	int			m_ClientID;
@@ -38,6 +39,8 @@ private:
 	std::vector<int>	m_ping_times;
 	bool				m_ping_in_progress;
 	int					m_Avg_Delay;
+	bool				isConnected;
+	bool				tranferComplete;
 
 public:
 
@@ -49,8 +52,7 @@ private:
 	int		TCP_Initialize(bool noDelay);
 	int		UDP_Initialize();
 
-	void	Clock_Start();
-	int		Clock_Stop();
+
 	float	GetAvrgRTT();
 
 public:
@@ -67,8 +69,12 @@ public:
 	void	TCP_Send(PacketHeader headertype);
 	void	UDP_Send(PacketHeader headertype, char* ip);
 	
-	void	Calculate_AVG_Delay();	//TCP
-	void	Calculate_AVG_Delay(char* ip);	//UDP
+	int		Calculate_AVG_Delay();	//TCP
+	int		Calculate_AVG_Delay(char* ip);	//UDP
+	bool	GetIsConnected();
+	bool	GetTransferComplete();
+	void	Clock_Start();
+	int		Clock_Stop();
 };
 
 #endif;

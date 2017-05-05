@@ -11,6 +11,7 @@ enum PacketHeader {
 	CONNECTION_REQUEST,
 	CLOCK_SYNC,
 	CLOCK_SYNC_RESPONSE,
+	TRANSFER_COMPLETE,
 	
 
 };
@@ -20,6 +21,7 @@ enum Protocol {
 	TCP,
 	TCP_WITH_NODELAY,
 	UDP,
+	RAKNET,
 };
 
 struct Packet
@@ -40,4 +42,20 @@ struct Packet
 
 };
 
+struct RakNetPacket
+{
+	unsigned char	typeId;
+	PacketHeader	packet_type;
+	
+	virtual void serialize(char * data)
+	{			//Turn the PacketType into bytes
+		memcpy(data, this, sizeof(RakNetPacket));
+	}
+
+	virtual void deserialize(char * data)
+	{			//Turn bytes into PacketType
+		memcpy(this, data, sizeof(RakNetPacket));
+	}
+
+};
 #endif

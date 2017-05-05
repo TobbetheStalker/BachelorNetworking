@@ -28,6 +28,11 @@ int RakNetModule::Clock_Stop()
 	return result;
 }
 
+bool RakNetModule::GetTransferComplete()
+{
+	return this->transferComplete;
+}
+
 float RakNetModule::GetAvrgRTT()
 {
 	float result = 0;
@@ -48,6 +53,7 @@ float RakNetModule::GetAvrgRTT()
 RakNetModule::RakNetModule()
 {
 	this->peer = nullptr;
+	this->transferComplete = false;
 }
 
 RakNetModule::~RakNetModule()
@@ -57,9 +63,9 @@ RakNetModule::~RakNetModule()
 bool RakNetModule::Initialize()
 {
 	this->peer = RakNet::RakPeerInterface::GetInstance();
-	this->listner = RakNet::SocketDescriptor((int)DEFAULT_PORT, 0);
+	this->listner = RakNet::SocketDescriptor(6881, 0);
 	
-	return false;
+	return 1;
 }
 
 void RakNetModule::Shutdown()
@@ -76,25 +82,35 @@ void RakNetModule::Update()
 	
 	for (RaKpacket = peer->Receive(); RaKpacket; peer->DeallocatePacket(RaKpacket), RaKpacket = peer->Receive())
 	{
+		int j = sizeof(RaKpacket->data);
 		p.deserialize((char*)RaKpacket->data);
 
-		switch (p.packet_type)
+		switch (RaKpacket->data[0])
 		{
 
-		case CLOCK_SYNC:
+		case R_CLOCK_SYNC:
 
-			this->Send(CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC_RESPONSE, CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			break;
 
-		case CLOCK_SYNC_RESPONSE:
+		case R_CLOCK_SYNC_RESPONSE:
 
 			this->Clock_Stop();
+			break;
 
-		case CONNECTION_REQUEST:
+		case R_CONNECTION_REQUEST:
 			printf("Recived CONNECTION_REQUEST Packet");
+			break;
 
-		case TEST:
+		case R_TEST:
 			printf("Recived Test Packet %d", p.packet_ID);
+			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			break;
 
+		case R_TRANSFER_COMPLETE :
+			this->transferComplete = true;
+
+			break;
 
 		default:
 			printf("Unkown packet type %d\n", p.packet_type);
@@ -108,16 +124,18 @@ bool RakNetModule::Connect(char * ip)
 	
 	this->peer->Startup(1, &this->listner, 1);
 	this->peer->SetMaximumIncomingConnections(2);
+	this->peer->Connect(ip, 6881, 0, 0);
 
 	return false;
 }
 
-void RakNetModule::Send(PacketHeader headertype, PacketPriority priority, PacketReliability reliability)
+void RakNetModule::Send(DefaultMessageIDTypes id, PacketHeader headertype, PacketPriority priority, PacketReliability reliability)
 {
-	const unsigned int packet_size = sizeof(Packet);
+	const unsigned int packet_size = sizeof(RakNetPacket);
 	char packet_data[packet_size];
 
-	Packet packet;
+	RakNetPacket packet;
+	packet.typeId = id;
 	packet.packet_type = headertype;
 
 	packet.serialize(packet_data);
@@ -125,7 +143,7 @@ void RakNetModule::Send(PacketHeader headertype, PacketPriority priority, Packet
 	peer->Send(packet_data, packet_size, priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 }
 
-void RakNetModule::Calculate_AVG_Delay()
+int RakNetModule::Calculate_AVG_Delay()
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -146,7 +164,7 @@ void RakNetModule::Calculate_AVG_Delay()
 		this->Clock_Start();
 
 		//Send the packet
-		this->Send(CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+		this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
@@ -157,4 +175,5 @@ void RakNetModule::Calculate_AVG_Delay()
 	}
 
 	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
+	return this->m_Avg_Delay;
 }

@@ -1,0 +1,2 @@
+"(PDH-CSV 4.0) (W. Europe Daylight Time)(-120)","\\COMPUTER\Network Interface(Realtek PCI GBE Family Controller)\Packets Sent/sec"
+"05/05/2017 15:02:49.244"," "
