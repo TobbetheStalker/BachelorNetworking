@@ -110,7 +110,7 @@ void RakNetModule::Update()
 		//in.Read(h);
 
 		p.deserialize((char*)RaKpacket->data);
-		
+
 		switch (RaKpacket->data[0])
 		{
 
@@ -163,7 +163,7 @@ void RakNetModule::Update()
 			break;
 
 		default:
-			printf("Unkown packet type %d\n", p.packet_type);
+			printf("Unkown packet type %d\n" /*,p.packet_type*/);
 			break;
 		}
 	}
@@ -172,8 +172,6 @@ void RakNetModule::Update()
 
 bool RakNetModule::Connect(char * ip)
 {
-	
-
 	int r = this->peer->Connect(ip, 6881, 0, 0);
 
 	return 1;
@@ -188,13 +186,11 @@ void RakNetModule::Send(DefaultMessageIDTypes id, PacketHeader headertype, Packe
 	RakNetPacket pack2;
 	packet.typeId = id;
 	packet.packet_type = headertype;
-
 	//RakNet::BitStream out;
 	//out.Write(id);
 	//out.Write(headertype);
 	
 	packet.serialize(packet_data);
-	pack2.deserialize(packet_data);
 
 	peer->Send(packet_data, packet_size, priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 }
