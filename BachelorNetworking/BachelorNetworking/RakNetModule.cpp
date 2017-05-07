@@ -50,6 +50,20 @@ float RakNetModule::GetAvrgRTT()
 	return result;
 }
 
+unsigned char RakNetModule::GetPacketIdentifier(RakNet::Packet * p)
+{
+	if (p == 0)
+		return 255;
+
+	if ((unsigned char)p->data[0] == ID_TIMESTAMP)
+	{
+		RakAssert(p->length > sizeof(RakNet::MessageID) + sizeof(RakNet::Time));
+		return (unsigned char)p->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)];
+	}
+	else
+		return (unsigned char)p->data[0];
+}
+
 RakNetModule::RakNetModule()
 {
 	this->peer = nullptr;
@@ -65,6 +79,9 @@ bool RakNetModule::Initialize()
 	this->peer = RakNet::RakPeerInterface::GetInstance();
 	this->listner = RakNet::SocketDescriptor(6881, 0);
 	
+	this->peer->Startup(3, &this->listner, 1);
+	this->peer->SetMaximumIncomingConnections(3);
+	
 	return 1;
 }
 
@@ -78,15 +95,49 @@ void RakNetModule::Shutdown()
 void RakNetModule::Update()
 {
 	RakNet::Packet* RaKpacket;
-	Packet p;
-	
+	RakNetPacket p;
+
 	for (RaKpacket = peer->Receive(); RaKpacket; peer->DeallocatePacket(RaKpacket), RaKpacket = peer->Receive())
 	{
+		unsigned char packetIdentifier = this->GetPacketIdentifier(RaKpacket);
 		int j = sizeof(RaKpacket->data);
-		p.deserialize((char*)RaKpacket->data);
 
+		//RakNet::BitStream in(RaKpacket->data, RaKpacket->length, false);
+		//RakNetPacket* p2 = (RakNetPacket*)RaKpacket->data;
+		//unsigned char c;
+		//PacketHeader h;
+		//in.Read(c);
+		//in.Read(h);
+
+		p.deserialize((char*)RaKpacket->data);
+		
 		switch (RaKpacket->data[0])
 		{
+
+		case ID_REMOTE_DISCONNECTION_NOTIFICATION:
+			printf("Another client has disconnected.\n");
+			break;
+		case ID_REMOTE_CONNECTION_LOST:
+			printf("Another client has lost the connection.\n");
+			break;
+		case ID_REMOTE_NEW_INCOMING_CONNECTION:
+			printf("Another client has connected.\n");
+			break;
+		case ID_CONNECTION_REQUEST_ACCEPTED:
+			printf("Our connection request has been accepted.\n");
+			break;
+		case ID_NEW_INCOMING_CONNECTION:
+			printf("A connection is incoming.\n");
+			break;
+		case ID_NO_FREE_INCOMING_CONNECTIONS:
+			printf("The server is full.\n");
+			break;
+		case ID_DISCONNECTION_NOTIFICATION:
+			printf("A client has disconnected.\n");
+			break;
+		case ID_CONNECTION_LOST:
+			printf("A client lost the connection.\n");
+			break;
 
 		case R_CLOCK_SYNC:
 
@@ -103,7 +154,6 @@ void RakNetModule::Update()
 			break;
 
 		case R_TEST:
-			printf("Recived Test Packet %d", p.packet_ID);
 			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
@@ -114,6 +164,7 @@ void RakNetModule::Update()
 
 		default:
 			printf("Unkown packet type %d\n", p.packet_type);
+			break;
 		}
 	}
 
@@ -122,23 +173,28 @@ void RakNetModule::Update()
 bool RakNetModule::Connect(char * ip)
 {
 	
-	this->peer->Startup(1, &this->listner, 1);
-	this->peer->SetMaximumIncomingConnections(2);
-	this->peer->Connect(ip, 6881, 0, 0);
 
-	return false;
+	int r = this->peer->Connect(ip, 6881, 0, 0);
+
+	return 1;
 }
 
 void RakNetModule::Send(DefaultMessageIDTypes id, PacketHeader headertype, PacketPriority priority, PacketReliability reliability)
 {
-	const unsigned int packet_size = sizeof(RakNetPacket);
+	const int packet_size = sizeof(RakNetPacket);
 	char packet_data[packet_size];
 
 	RakNetPacket packet;
+	RakNetPacket pack2;
 	packet.typeId = id;
 	packet.packet_type = headertype;
 
+	//RakNet::BitStream out;
+	//out.Write(id);
+	//out.Write(headertype);
+	
 	packet.serialize(packet_data);
+	pack2.deserialize(packet_data);
 
 	peer->Send(packet_data, packet_size, priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 }

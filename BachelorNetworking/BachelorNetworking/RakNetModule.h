@@ -5,6 +5,7 @@
 #include "RakPeerInterface.h"
 #include "RakNetTypes.h"
 #include "MessageIdentifiers.h"
+#include "BitStream.h"
 #include "NetworkData.h"
 #include <vector>
 
@@ -27,6 +28,7 @@ public:
 private:
 
 	float	GetAvrgRTT();
+	unsigned char GetPacketIdentifier(RakNet::Packet *p);
 
 public:
 	RakNetModule();

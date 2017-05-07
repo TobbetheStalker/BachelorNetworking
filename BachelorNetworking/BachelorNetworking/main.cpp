@@ -9,7 +9,7 @@
 
 #pragma comment(lib, "pdh.lib")
 
-CONST LPCSTR COUNTER_PATH = "\\Network Interface(Realtek PCI GBE Family Controller)\\Packets Sent/sec";
+CONST LPCSTR COUNTER_PATH = "\\Network Interface(Realtek PCI GBE Family Controller)\\Bytes Sent/sec";
 //"\\Processor(0)\\% Processor Time";
 CONST ULONG SAMPLE_INTERVAL_MS = 1000;
 Protocol p = Protocol::NONE;
@@ -17,6 +17,12 @@ std::string filename = "log";
 char* ip = "";
 bool isSender = false;
 bool DoLog = true;
+HQUERY hQuery = NULL;
+	HLOG hLog = NULL;
+	PDH_STATUS pdhStatus;
+	DWORD dwLogType = PDH_LOG_TYPE_CSV;
+	HCOUNTER hCounter;
+
 
 bool SetParam(int argc, char* argv[])
 {
@@ -126,21 +132,21 @@ bool SetParam(int argc, char* argv[])
 	return 1;
 }
 
-void Log( void*)
+void LogStart()
 {
-	HQUERY hQuery = NULL;
-	HLOG hLog = NULL;
-	PDH_STATUS pdhStatus;
-	DWORD dwLogType = PDH_LOG_TYPE_CSV;
-	HCOUNTER hCounter;
-
 	// Open a query object.
 	pdhStatus = PdhOpenQuery(NULL, 0, &hQuery);
 
 	if (pdhStatus != ERROR_SUCCESS)
 	{
 		wprintf(L"PdhOpenQuery failed with 0x%x\n", pdhStatus);
-		goto cleanup;
+		// Close the log file.
+		if (hLog)
+			PdhCloseLog(hLog, 0);
+
+		// Close the query object.
+		if (hQuery)
+			PdhCloseQuery(hQuery);
 	}
 
 	// Add one counter that will provide the data.
@@ -152,11 +158,17 @@ void Log( void*)
 	if (pdhStatus != ERROR_SUCCESS)
 	{
 		wprintf(L"PdhAddCounter failed with 0x%x\n", pdhStatus);
-		goto cleanup;
+		// Close the log file.
+		if (hLog)
+			PdhCloseLog(hLog, 0);
+
+		// Close the query object.
+		if (hQuery)
+			PdhCloseQuery(hQuery);
 	}
 
 	// Open the log file for write access.
-	
+
 	pdhStatus = PdhOpenLog(filename.c_str(),
 		PDH_LOG_WRITE_ACCESS | PDH_LOG_CREATE_ALWAYS,
 		&dwLogType,
@@ -168,15 +180,23 @@ void Log( void*)
 	if (pdhStatus != ERROR_SUCCESS)
 	{
 		wprintf(L"PdhOpenLog failed with 0x%x\n", pdhStatus);
-		goto cleanup;
-	}
+		// Close the log file.
+		if (hLog)
+			PdhCloseLog(hLog, 0);
 
+		// Close the query object.
+		if (hQuery)
+			PdhCloseQuery(hQuery);
+	}
+}
+
+void Log( void*)
+{
 	int count = 0;
 	// Write 10 records to the log file.
 	while (DoLog && count || count == 0)
 	{
 		wprintf(L"Writing record \n");
-
 		pdhStatus = PdhUpdateLog(hLog, NULL);
 		if (ERROR_SUCCESS != pdhStatus)
 		{
@@ -239,6 +259,7 @@ int main(int argc, char *argv[])
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
 							
 						//Start log
+						LogStart();
 						threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
 
 						//Start Timer

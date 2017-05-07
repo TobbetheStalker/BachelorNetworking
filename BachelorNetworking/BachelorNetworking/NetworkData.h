@@ -24,6 +24,7 @@ enum Protocol {
 	RAKNET,
 };
 
+
 struct Packet
 {
 	PacketHeader	packet_type;
@@ -42,6 +43,7 @@ struct Packet
 
 };
 
+#pragma pack(1)
 struct RakNetPacket
 {
 	unsigned char	typeId;
@@ -58,4 +60,6 @@ struct RakNetPacket
 	}
 
 };
+
+
 #endif
