@@ -28,7 +28,6 @@ public:
 private:
 
 	float	GetAvrgRTT();
-	unsigned char GetPacketIdentifier(RakNet::Packet *p);
 
 public:
 	RakNetModule();

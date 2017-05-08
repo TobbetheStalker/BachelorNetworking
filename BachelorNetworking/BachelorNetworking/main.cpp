@@ -259,8 +259,8 @@ int main(int argc, char *argv[])
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
 							
 						//Start log
-						LogStart();
-						threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
+						//LogStart();
+						//threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
 
 						//Start Timer
 						wsModule.Clock_Start();
@@ -278,8 +278,8 @@ int main(int argc, char *argv[])
 						timeNS = wsModule.Clock_Stop();
 						
 						//Stop Log
-						DoLog = false;
-						WaitForSingleObject(threadH, INFINITE);
+						//DoLog = false;
+						//WaitForSingleObject(threadH, INFINITE);
 						
 						//Take time - avg delay
 						totalTimeNS = timeNS - avgDelayNS;
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
 					avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
 
 					//Start log
-					threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
+					//threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
 
 					//Start Timer
 					wsModule.Clock_Start();
@@ -322,8 +322,8 @@ int main(int argc, char *argv[])
 					timeNS = wsModule.Clock_Stop();
 
 					//Stop Log
-					DoLog = false;
-					WaitForSingleObject(threadH, INFINITE);
+					//DoLog = false;
+					//WaitForSingleObject(threadH, INFINITE);
 
 					//Take time - avg delay
 					totalTimeNS = timeNS - avgDelayNS;
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
 			avgDelayNS = rnModule.Calculate_AVG_Delay();
 
 			//Start log
-			threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
+			//threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
 
 			//Start Timer
 			rnModule.Clock_Start();
@@ -368,8 +368,8 @@ int main(int argc, char *argv[])
 			timeNS = rnModule.Clock_Stop();
 
 			//Stop Log
-			DoLog = false;
-			WaitForSingleObject(threadH, INFINITE);
+			//DoLog = false;
+			//WaitForSingleObject(threadH, INFINITE);
 
 			//Take time - avg delay
 			totalTimeNS = timeNS - avgDelayNS;

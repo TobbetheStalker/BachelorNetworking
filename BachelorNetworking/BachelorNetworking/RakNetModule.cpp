@@ -50,20 +50,6 @@ float RakNetModule::GetAvrgRTT()
 	return result;
 }
 
-unsigned char RakNetModule::GetPacketIdentifier(RakNet::Packet * p)
-{
-	if (p == 0)
-		return 255;
-
-	if ((unsigned char)p->data[0] == ID_TIMESTAMP)
-	{
-		RakAssert(p->length > sizeof(RakNet::MessageID) + sizeof(RakNet::Time));
-		return (unsigned char)p->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)];
-	}
-	else
-		return (unsigned char)p->data[0];
-}
-
 RakNetModule::RakNetModule()
 {
 	this->peer = nullptr;
@@ -99,15 +85,6 @@ void RakNetModule::Update()
 
 	for (RaKpacket = peer->Receive(); RaKpacket; peer->DeallocatePacket(RaKpacket), RaKpacket = peer->Receive())
 	{
-		unsigned char packetIdentifier = this->GetPacketIdentifier(RaKpacket);
-		int j = sizeof(RaKpacket->data);
-
-		//RakNet::BitStream in(RaKpacket->data, RaKpacket->length, false);
-		//RakNetPacket* p2 = (RakNetPacket*)RaKpacket->data;
-		//unsigned char c;
-		//PacketHeader h;
-		//in.Read(c);
-		//in.Read(h);
 
 		p.deserialize((char*)RaKpacket->data);
 
@@ -186,10 +163,7 @@ void RakNetModule::Send(DefaultMessageIDTypes id, PacketHeader headertype, Packe
 	RakNetPacket pack2;
 	packet.typeId = id;
 	packet.packet_type = headertype;
-	//RakNet::BitStream out;
-	//out.Write(id);
-	//out.Write(headertype);
-	
+
 	packet.serialize(packet_data);
 
 	peer->Send(packet_data, packet_size, priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
