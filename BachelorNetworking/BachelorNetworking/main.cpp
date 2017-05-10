@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 				rnModule.Clock_Start();
 
 				//Send data
-				rnModule.Send(DefaultMessageIDTypes::R_TEST, TEST, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+				rnModule.Send(DefaultMessageIDTypes::R_TEST, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 
 				//Recive Last ack
 				while (rnModule.GetTransferComplete() == false)

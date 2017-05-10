@@ -192,7 +192,7 @@ int RakNetModule::Calculate_AVG_Delay()
 		this->Clock_Start();
 
 		//Send the packet
-		this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+		this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
