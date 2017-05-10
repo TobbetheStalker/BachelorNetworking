@@ -33,6 +33,11 @@ bool RakNetModule::GetTransferComplete()
 	return this->transferComplete;
 }
 
+bool RakNetModule::GetIsConnected()
+{
+	return this->isConnected;
+}
+
 float RakNetModule::GetAvrgRTT()
 {
 	float result = 0;
@@ -55,6 +60,7 @@ RakNetModule::RakNetModule()
 {
 	this->peer = nullptr;
 	this->transferComplete = false;
+	this->isConnected = false;
 }
 
 RakNetModule::~RakNetModule()
@@ -103,6 +109,7 @@ void RakNetModule::Update()
 			break;
 		case ID_CONNECTION_REQUEST_ACCEPTED:
 			printf("Our connection request has been accepted.\n");
+			this->isConnected = true;
 			break;
 		case ID_NEW_INCOMING_CONNECTION:
 			//this->Send(DefaultMessageIDTypes::R_START_PING, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);

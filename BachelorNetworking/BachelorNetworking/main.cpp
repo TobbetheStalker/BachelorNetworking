@@ -156,33 +156,34 @@ int main(int argc, char *argv[])
 
 					wsModule.TCP_Update();
 					
-					if (wsModule.GetIsConnected())
+					//Wait for connection, not really needed since TCP blocks until connection
+					while (wsModule.GetIsConnected() != true)
 					{
-						//Take avg delay of the connection
-						avgDelayNS = wsModule.Calculate_AVG_Delay();
+						wsModule.Update();
+					}
+				
+					//Take avg delay of the connection
+					avgDelayNS = wsModule.Calculate_AVG_Delay();
 							
-						//Start Timer
-						wsModule.Clock_Start();
+					//Start Timer
+					wsModule.Clock_Start();
 
-						//Send data
-						wsModule.TCP_Send(TEST);
+					//Send data
+					wsModule.TCP_Send(TEST);
 
-						//Recive Last ack
-						while (wsModule.GetTransferComplete() == false)
-						{
-							wsModule.TCP_Update();
-						}
-
-						//Stop timer
-						timeNS = wsModule.Clock_Stop();
-						
-						//Take time - avg delay
-						totalTimeNS = timeNS - avgDelayNS;
-						printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
-						
+					//Recive Last ack
+					while (wsModule.GetTransferComplete() == false)
+					{
+						wsModule.TCP_Update();
 					}
 
-
+					//Stop timer
+					timeNS = wsModule.Clock_Stop();
+						
+					//Take time - avg delay
+					totalTimeNS = timeNS - avgDelayNS;
+					printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
+						
 				}
 				else //Is set to be reciver
 				{
@@ -238,6 +239,12 @@ int main(int argc, char *argv[])
 			if (isSender)
 			{
 				rnModule.Connect(ip);
+
+				//Wait until handshake is completed
+				while (rnModule.GetIsConnected() != true)
+				{
+					rnModule.Update();
+				}
 
 				//Take avg delay of the connection
 				avgDelayNS = rnModule.Calculate_AVG_Delay();

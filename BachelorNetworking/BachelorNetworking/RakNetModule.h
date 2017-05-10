@@ -22,6 +22,7 @@ private:
 	bool				m_ping_in_progress;
 	int					m_Avg_Delay;
 	bool				transferComplete;
+	bool				isConnected;
 
 public:
 
@@ -45,6 +46,7 @@ public:
 	void	Clock_Start();
 	int		Clock_Stop();
 	bool	GetTransferComplete();
+	bool	GetIsConnected();
 };
 
 #endif
