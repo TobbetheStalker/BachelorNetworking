@@ -128,21 +128,21 @@ void RakNetModule::Update()
 			break;
 
 		case R_CLOCK_SYNC_RESPONSE:
-			printf("Recived R_CLOCK_SYNC_RESPONSE Packet");
+			printf("Recived R_CLOCK_SYNC_RESPONSE Packet\n");
 			this->Clock_Stop();
 			break;
 
 		case R_CONNECTION_REQUEST:
-			printf("Recived R_CONNECTION_REQUEST Packet");
+			printf("Recived R_CONNECTION_REQUEST Packet\n");
 			break;
 
 		case R_TEST:
-			printf("Recived R_TEST Packet");
+			printf("Recived R_TEST Packet\n");
 			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_TRANSFER_COMPLETE :
-			printf("Recived R_TRANSFER_COMPLETE Packet");
+			printf("Recived R_TRANSFER_COMPLETE Packet\n");
 			this->transferComplete = true;
 
 			break;
