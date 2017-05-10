@@ -152,7 +152,7 @@ void WinsocModule::UDP_Update()
 	while (data_read != data_length)
 	{
 		//Read the header (skip the first 4 bytes since it is virtual function information)
-		memcpy(&header, &network_data[data_read + 8], sizeof(PacketHeader));
+		memcpy(&header, &network_data[data_read], sizeof(PacketHeader));
 
 		switch (header)
 		{
@@ -178,7 +178,7 @@ void WinsocModule::UDP_Update()
 			break;
 
 		case DATA:
-			memcpy(&dp, &network_data[data_read + 8], sizeof(DataPacket));
+			memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
 			printf("Recived CONNECTION_REQUEST Packet %d of %d\n",dp.ID, dp.nrOfPackets);
 			this->dataCounter++;
 			if (this->dataCounter == dp.nrOfPackets)
@@ -384,7 +384,7 @@ void WinsocModule::ReadMessagesFromClients()
 			break;
 
 		case DATA:
-			memcpy(&dp, &network_data[data_read + 8], sizeof(DataPacket));
+			memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
 			printf("Recived CONNECTION_REQUEST Packet %d of %d\n", dp.ID, dp.nrOfPackets);
 			this->dataCounter++;
 			if (this->dataCounter == dp.nrOfPackets)
