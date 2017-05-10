@@ -3,6 +3,7 @@
 #include "RakNetModule.h"
 #include <process.h>
 
+#pragma warning(disable:4789)
 #pragma comment(lib, "pdh.lib")
 
 CONST LPCSTR COUNTER_PATH = "\\Network Interface(Realtek PCI GBE Family Controller)\\Bytes Sent/sec";
