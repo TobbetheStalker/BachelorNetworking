@@ -480,15 +480,15 @@ void WinsocModule::TCP_Send_Data()
 		prevTime = currTime;
 		QueryPerformanceCounter(&currTime);
 		elapsedTime.QuadPart = currTime.QuadPart - prevTime.QuadPart;
-		elapsedTime.QuadPart *= 1000000;
+		elapsedTime.QuadPart /= 1000000;
 		elapsedTime.QuadPart /= frequency.QuadPart;
 		
-		if ((float)elapsedTime.QuadPart < 0.000001f)
+		if ((float)elapsedTime.QuadPart < 1.f)
 		{
 			packet.ID = counter;
 			NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
 			counter++;
-			printf("Sent DataPacket %d", counter);
+			printf("Sent DataPacket %d\n", counter);
 		}
 
 		
