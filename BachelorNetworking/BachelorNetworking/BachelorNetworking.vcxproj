@@ -89,12 +89,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WPCAP;HAVE_REMOTE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\RakNet\Source;$(SolutionDir)\WpdPack\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\RakNet\Source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;wpcap.lib;Packet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\WpdPack\Lib;$(SolutionDir)\RakNet\Libs</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -264,7 +264,6 @@
     <ClCompile Include="..\RakNet\Source\_FindFirst.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkService.cpp" />
-    <ClCompile Include="PCapModule.cpp" />
     <ClCompile Include="RakNetModule.cpp" />
     <ClCompile Include="WinsocModule.cpp" />
   </ItemGroup>
@@ -425,7 +424,6 @@
     <ClInclude Include="..\RakNet\Source\_FindFirst.h" />
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkService.h" />
-    <ClInclude Include="PCapModule.h" />
     <ClInclude Include="RakNetModule.h" />
     <ClInclude Include="WinsocModule.h" />
   </ItemGroup>

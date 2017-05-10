@@ -2,9 +2,6 @@
 #include <iostream>
 #include "WinsocModule.h"
 #include "RakNetModule.h"
-#include "PCapModule.h"
-#include <pdh.h>
-#include <pdhmsg.h>
 #include <process.h>
 
 #pragma comment(lib, "pdh.lib")
@@ -16,12 +13,7 @@ Protocol p = Protocol::NONE;
 std::string filename = "log";
 char* ip = "";
 bool isSender = false;
-bool DoLog = true;
-HQUERY hQuery = NULL;
-	HLOG hLog = NULL;
-	PDH_STATUS pdhStatus;
-	DWORD dwLogType = PDH_LOG_TYPE_CSV;
-	HCOUNTER hCounter;
+
 
 
 bool SetParam(int argc, char* argv[])
@@ -132,95 +124,6 @@ bool SetParam(int argc, char* argv[])
 	return 1;
 }
 
-void LogStart()
-{
-	// Open a query object.
-	pdhStatus = PdhOpenQuery(NULL, 0, &hQuery);
-
-	if (pdhStatus != ERROR_SUCCESS)
-	{
-		wprintf(L"PdhOpenQuery failed with 0x%x\n", pdhStatus);
-		// Close the log file.
-		if (hLog)
-			PdhCloseLog(hLog, 0);
-
-		// Close the query object.
-		if (hQuery)
-			PdhCloseQuery(hQuery);
-	}
-
-	// Add one counter that will provide the data.
-	pdhStatus = PdhAddCounter(hQuery,
-		COUNTER_PATH,
-		0,
-		&hCounter);
-
-	if (pdhStatus != ERROR_SUCCESS)
-	{
-		wprintf(L"PdhAddCounter failed with 0x%x\n", pdhStatus);
-		// Close the log file.
-		if (hLog)
-			PdhCloseLog(hLog, 0);
-
-		// Close the query object.
-		if (hQuery)
-			PdhCloseQuery(hQuery);
-	}
-
-	// Open the log file for write access.
-
-	pdhStatus = PdhOpenLog(filename.c_str(),
-		PDH_LOG_WRITE_ACCESS | PDH_LOG_CREATE_ALWAYS,
-		&dwLogType,
-		hQuery,
-		0,
-		NULL,
-		&hLog);
-
-	if (pdhStatus != ERROR_SUCCESS)
-	{
-		wprintf(L"PdhOpenLog failed with 0x%x\n", pdhStatus);
-		// Close the log file.
-		if (hLog)
-			PdhCloseLog(hLog, 0);
-
-		// Close the query object.
-		if (hQuery)
-			PdhCloseQuery(hQuery);
-	}
-}
-
-void Log( void*)
-{
-	int count = 0;
-	// Write 10 records to the log file.
-	while (DoLog && count || count == 0)
-	{
-		wprintf(L"Writing record \n");
-		pdhStatus = PdhUpdateLog(hLog, NULL);
-		if (ERROR_SUCCESS != pdhStatus)
-		{
-			wprintf(L"PdhUpdateLog failed with 0x%x\n", pdhStatus);
-			goto cleanup;
-		}
-		count++;
-		// Wait one second between samples for a counter update.
-		Sleep(SAMPLE_INTERVAL_MS);
-	}
-
-cleanup:
-
-	// Close the log file.
-	if (hLog)
-		PdhCloseLog(hLog, 0);
-
-	// Close the query object.
-	if (hQuery)
-		PdhCloseQuery(hQuery);
-
-	return;
-}
-
 int main(int argc, char *argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -258,10 +161,6 @@ int main(int argc, char *argv[])
 						//Take avg delay of the connection
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
 							
-						//Start log
-						//LogStart();
-						//threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
-
 						//Start Timer
 						wsModule.Clock_Start();
 
@@ -276,10 +175,6 @@ int main(int argc, char *argv[])
 
 						//Stop timer
 						timeNS = wsModule.Clock_Stop();
-						
-						//Stop Log
-						//DoLog = false;
-						//WaitForSingleObject(threadH, INFINITE);
 						
 						//Take time - avg delay
 						totalTimeNS = timeNS - avgDelayNS;
@@ -303,8 +198,6 @@ int main(int argc, char *argv[])
 					//Take avg delay of the connection
 					avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
 
-					//Start log
-					//threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
 
 					//Start Timer
 					wsModule.Clock_Start();
@@ -320,10 +213,6 @@ int main(int argc, char *argv[])
 
 					//Stop timer
 					timeNS = wsModule.Clock_Stop();
-
-					//Stop Log
-					//DoLog = false;
-					//WaitForSingleObject(threadH, INFINITE);
 
 					//Take time - avg delay
 					totalTimeNS = timeNS - avgDelayNS;
@@ -349,9 +238,6 @@ int main(int argc, char *argv[])
 			//Take avg delay of the connection
 			avgDelayNS = rnModule.Calculate_AVG_Delay();
 
-			//Start log
-			//threadH = (HANDLE)_beginthread(&Log, 0, (void*)0);
-
 			//Start Timer
 			rnModule.Clock_Start();
 
@@ -366,10 +252,6 @@ int main(int argc, char *argv[])
 
 			//Stop timer
 			timeNS = rnModule.Clock_Stop();
-
-			//Stop Log
-			//DoLog = false;
-			//WaitForSingleObject(threadH, INFINITE);
 
 			//Take time - avg delay
 			totalTimeNS = timeNS - avgDelayNS;
