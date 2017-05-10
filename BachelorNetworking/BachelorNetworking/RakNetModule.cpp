@@ -118,30 +118,32 @@ void RakNetModule::Update()
 			break;
 
 		case R_CLOCK_SYNC:
-
+			printf("Recived R_CLOCK_SYNC Packet");
 			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC_RESPONSE, CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_CLOCK_SYNC_RESPONSE:
-
+			printf("Recived R_CLOCK_SYNC_RESPONSE Packet");
 			this->Clock_Stop();
 			break;
 
 		case R_CONNECTION_REQUEST:
-			printf("Recived CONNECTION_REQUEST Packet");
+			printf("Recived R_CONNECTION_REQUEST Packet");
 			break;
 
 		case R_TEST:
+			printf("Recived R_TEST Packet");
 			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_TRANSFER_COMPLETE :
+			printf("Recived R_TRANSFER_COMPLETE Packet");
 			this->transferComplete = true;
 
 			break;
 
 		default:
-			printf("Unkown packet type %d\n" /*,p.packet_type*/);
+			printf("Unkown packet type %d\n", RaKpacket->data[0]);
 			break;
 		}
 	}
