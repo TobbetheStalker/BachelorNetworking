@@ -1,8 +1,8 @@
 #ifndef NETWORKDATA_H
 #define NETWORKDATA_H
 
-#define MAX_PACKET_SIZE 2000000000
-const int GIGABYTE = 1073741824;
+#define MAX_PACKET_SIZE 100000
+//const int GIGABYTE = 1073741824;
 
 #include <string>
 #include <chrono>
@@ -30,34 +30,14 @@ struct Packet
 {
 	PacketHeader	packet_type;	//4 bytes
 
-	//Functions: 4 bytes
-	virtual void serialize(char * data)
-	{			//Turn the PacketType into bytes
-		memcpy(data, this, sizeof(Packet));
-	}
-
-	virtual void deserialize(char * data)
-	{			//Turn bytes into PacketType
-		memcpy(this, data, sizeof(Packet));
-	}
-
 };
 
 struct DataPacket
 {
 	PacketHeader	packet_type;		//4 bytes
-	char			data[GIGABYTE];		//1GB
-
-	//Functions: 4 bytes
-	virtual void serialize(char * data)
-	{			//Turn the PacketType into bytes
-		memcpy(data, this, sizeof(Packet));
-	}
-
-	virtual void deserialize(char * data)
-	{			//Turn bytes into PacketType
-		memcpy(this, data, sizeof(Packet));
-	}
+	int				nrOfPackets;		//4 bytes
+	char			data[15000];		//15000 bytes
+	int				ID;					//4 bytes
 
 };
 

@@ -12,6 +12,7 @@ WinsocModule::WinsocModule()
 	this->m_Avg_Delay = 0;
 	this->isConnected = false;
 	this->tranferComplete = false;
+	this->dataCounter = 0;
 }
 
 WinsocModule::~WinsocModule()
@@ -127,6 +128,7 @@ void WinsocModule::UDP_Update()
 	char network_data[MAX_PACKET_SIZE];
 	int data_read = 0;
 	Packet p;
+	DataPacket dp;
 
 	fflush(stdout);
 
@@ -170,24 +172,29 @@ void WinsocModule::UDP_Update()
 			break;
 
 		case CONNECTION_REQUEST:
-			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
 			printf("Recived CONNECTION_REQUEST Packet \n");
 			break;
 
 		case DATA:
-			//p.deserialize(&network_data[data_read]);
-			data_read += sizeof(Packet);
+			memcpy(&dp, &network_data[data_read + 8], sizeof(DataPacket));
+			printf("Recived CONNECTION_REQUEST Packet %d of %d\n",dp.ID, dp.nrOfPackets);
+			this->dataCounter++;
+			if (this->dataCounter == dp.nrOfPackets)
+			{
+				this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
+			}
 
-			printf("Recived TEST Packet\n");
-			this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
+			data_read += sizeof(DataPacket);
+
 			break;
 
 		case TRANSFER_COMPLETE:
 			printf("Recived TRANSFER_COMPLETE Packet \n");
 			data_read += sizeof(Packet);
 			this->tranferComplete = true;
+			this->dataCounter = 0;
 			break;
 
 		default:
@@ -280,15 +287,12 @@ int WinsocModule::TCP_Connect(char * ip)
 
 		//Send CONNECTION_REQUEST package
 		const unsigned int packet_size = sizeof(Packet);
-		char packet_data[packet_size];
 
 		Packet packet;
 		packet.packet_type = CONNECTION_REQUEST;
 
-		packet.serialize(packet_data);
-
 		// Send the packet directly to the host
-		NetworkService::sendMessage(this->m_TCP_SenderSocket, packet_data, packet_size);
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
 		printf("Sent CONNECTION_REQUEST to host\n");
 
 		// Add the host to connectedClients before getting a CONNECTION_ACCEPTED back 
@@ -338,6 +342,7 @@ void WinsocModule::ReadMessagesFromClients()
 
 	// The objects to load the data into
 	Packet p;
+	DataPacket dp;
 
 	//Check if there is data
 	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, network_data, MAX_PACKET_SIZE);
@@ -353,7 +358,7 @@ void WinsocModule::ReadMessagesFromClients()
 	while (data_read != data_length)
 	{
 		//Read the header (skip the first 4 bytes since it is virtual function information)
-		memcpy(&header, &network_data[data_read + 8], sizeof(PacketHeader));
+		memcpy(&header, &network_data[data_read], sizeof(PacketHeader));
 
 		switch (header)
 		{
@@ -373,24 +378,29 @@ void WinsocModule::ReadMessagesFromClients()
 			break;
 
 		case CONNECTION_REQUEST :
-			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
 			printf("Recived CONNECTION_REQUEST Packet \n");
 			break;
 
 		case DATA:
-			//p.deserialize(&network_data[data_read]);
-			data_read += sizeof(Packet);
+			memcpy(&dp, &network_data[data_read + 8], sizeof(DataPacket));
+			printf("Recived CONNECTION_REQUEST Packet %d of %d\n", dp.ID, dp.nrOfPackets);
+			this->dataCounter++;
+			if (this->dataCounter == dp.nrOfPackets)
+			{
+				this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
+			}
 			
-			printf("Recived TEST Packet \n");
-			this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
+			data_read += sizeof(DataPacket);
+			
 			break;
 
 		case TRANSFER_COMPLETE :
 			printf("Recived TRANSFER_COMPLETE Packet \n");
 			data_read += sizeof(Packet);
 			this->tranferComplete = true;
+			this->dataCounter = 0;
 			break;
 
 		default:
@@ -441,13 +451,30 @@ int WinsocModule::GetMyIp()
 void WinsocModule::TCP_Send(PacketHeader headertype)
 {
 	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
 
 	Packet packet;
 	packet.packet_type = headertype;
 
-	packet.serialize(packet_data);
-	NetworkService::sendMessage(this->m_TCP_SenderSocket, packet_data, packet_size);
+	NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
+}
+
+void WinsocModule::TCP_Send_Data()
+{
+	//1GB = 1073741824 bytes;
+	int nrOfPackets = ceil(1073741824 / (sizeof(DataPacket) - 16 ) );
+	const unsigned int packet_size = sizeof(DataPacket);
+
+	DataPacket packet;
+	packet.packet_type = DATA;
+	packet.nrOfPackets = nrOfPackets;
+	
+	for (int i =0; i < nrOfPackets; i++)
+	{
+		packet.ID = i;
+		
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
+	}
+
 }
 
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
@@ -458,15 +485,13 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
 
 	Packet packet;
 	packet.packet_type = headertype;
 
-	packet.serialize(packet_data);
 	//NetworkService::sendMessage(this->m_UDP_Socket, packet_data, packet_size);
 	
-	if (sendto(this->m_UDP_Socket, packet_data, packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+	if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
 	{
 		printf("sendto() failed with error code : %d \n", WSAGetLastError());
 	}

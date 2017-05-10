@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 					wsModule.Clock_Start();
 
 					//Send data
-					wsModule.TCP_Send(DATA);
+					wsModule.TCP_Send_Data();
 
 					//Recive Last ack
 					while (wsModule.GetTransferComplete() == false)

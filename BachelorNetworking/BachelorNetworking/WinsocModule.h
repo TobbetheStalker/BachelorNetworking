@@ -11,6 +11,7 @@
 #include <vector>
 #include "NetworkData.h"
 #include "NetworkService.h"
+#include <math.h>
 
 #ifdef _WIN64
 #define PACKETOFFSET 8
@@ -41,6 +42,7 @@ private:
 	int					m_Avg_Delay;
 	bool				isConnected;
 	bool				tranferComplete;
+	int					dataCounter;
 
 public:
 
@@ -67,6 +69,7 @@ public:
 	int		TCP_Connect(char* ip);
 
 	void	TCP_Send(PacketHeader headertype);
+	void	TCP_Send_Data();
 	void	UDP_Send(PacketHeader headertype, char* ip);
 	
 	int		Calculate_AVG_Delay();	//TCP
