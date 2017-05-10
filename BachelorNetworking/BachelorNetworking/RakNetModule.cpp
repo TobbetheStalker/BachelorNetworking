@@ -118,12 +118,12 @@ void RakNetModule::Update()
 			break;
 
 		case R_START_PING:
-			printf("Recived R_CLOCK_SYNC Packet");
+			printf("Recived R_CLOCK_SYNC Packet\n");
 			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_CLOCK_SYNC:
-			printf("Recived R_CLOCK_SYNC Packet");
+			printf("Recived R_CLOCK_SYNC Packet\n");
 			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
