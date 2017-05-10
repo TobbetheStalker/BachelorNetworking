@@ -86,7 +86,7 @@ void RakNetModule::Update()
 	for (RaKpacket = peer->Receive(); RaKpacket; peer->DeallocatePacket(RaKpacket), RaKpacket = peer->Receive())
 	{
 
-		p.deserialize((char*)RaKpacket->data);
+		//p.deserialize((char*)RaKpacket->data);
 
 		switch (RaKpacket->data[0])
 		{
@@ -159,17 +159,12 @@ bool RakNetModule::Connect(char * ip)
 
 void RakNetModule::Send(DefaultMessageIDTypes id, PacketHeader headertype, PacketPriority priority, PacketReliability reliability)
 {
-	const int packet_size = sizeof(RakNetPacket);
-	char packet_data[packet_size];
 
 	RakNetPacket packet;
-	RakNetPacket pack2;
 	packet.typeId = id;
 	packet.packet_type = headertype;
 
-	packet.serialize(packet_data);
-
-	peer->Send(packet_data, packet_size, priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+	peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet) , priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 }
 
 int RakNetModule::Calculate_AVG_Delay()

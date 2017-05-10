@@ -429,7 +429,7 @@ enum DefaultMessageIDTypes
 	// For the user to use.  Start your first enumeration at this value.
 	ID_USER_PACKET_ENUM,
 	//Custom
-	R_TEST,
+	R_TEST = ID_USER_PACKET_ENUM,
 	R_CONNECTION_REQUEST,
 	R_CLOCK_SYNC,
 	R_CLOCK_SYNC_RESPONSE,
