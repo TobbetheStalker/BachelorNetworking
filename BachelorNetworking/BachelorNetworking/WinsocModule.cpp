@@ -352,8 +352,6 @@ void WinsocModule::ReadMessagesFromClients()
 	
 	while (data_read != data_length)
 	{
-		int x = sizeof(Packet);
-		int j = sizeof(std::chrono::time_point<std::chrono::system_clock>) + sizeof(PacketHeader) + sizeof(int);
 		//Read the header (skip the first 4 bytes since it is virtual function information)
 		memcpy(&header, &network_data[data_read + 8], sizeof(PacketHeader));
 
@@ -363,14 +361,14 @@ void WinsocModule::ReadMessagesFromClients()
 		case CLOCK_SYNC :
 			//Resend a PING_RESPONSE
 			this->TCP_Send(CLOCK_SYNC_RESPONSE);
-
+			printf("Recived CLOCK_SYNC Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
 		case CLOCK_SYNC_RESPONSE:
 			
 			this->Clock_Stop();
-
+			printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
