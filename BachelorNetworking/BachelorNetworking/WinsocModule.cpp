@@ -158,14 +158,14 @@ void WinsocModule::UDP_Update()
 		case CLOCK_SYNC:
 			//Resend a PING_RESPONSE
 			this->UDP_Send(CLOCK_SYNC_RESPONSE, inet_ntoa(si_other.sin_addr));
-
+			printf("Recived CLOCK_SYNC Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
 		case CLOCK_SYNC_RESPONSE:
 
 			this->Clock_Stop();
-
+			printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
@@ -180,11 +180,12 @@ void WinsocModule::UDP_Update()
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
-			printf("Recived Test Packet %d \n", p.packet_ID);
+			printf("Recived TEST Packet %d \n", p.packet_ID);
 			this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
 			break;
 
 		case TRANSFER_COMPLETE:
+			printf("Recived TRANSFER_COMPLETE Packet \n");
 			data_read += sizeof(Packet);
 			this->tranferComplete = true;
 			break;
@@ -384,11 +385,12 @@ void WinsocModule::ReadMessagesFromClients()
 			p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 			
-			printf("Recived Test Packet %d \n", p.packet_ID);
+			printf("Recived TEST Packet %d \n", p.packet_ID);
 			this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
 			break;
 
 		case TRANSFER_COMPLETE :
+			printf("Recived TRANSFER_COMPLETE Packet \n");
 			data_read += sizeof(Packet);
 			this->tranferComplete = true;
 			break;
@@ -545,7 +547,7 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 	//Clear any reamining times
 	this->m_ping_times.clear();
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 300; i++)
 	{
 		//Start the clock
 		this->Clock_Start();
