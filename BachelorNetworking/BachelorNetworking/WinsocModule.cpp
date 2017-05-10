@@ -320,6 +320,7 @@ bool WinsocModule::AcceptNewClient()
 		}
 
 		this->m_TCP_ConenctedSocket = otherClientSocket;
+		this->m_TCP_SenderSocket = otherClientSocket:
 		printf("client %d has been connected to the server\n", this->m_ClientID);
 		this->m_ClientID++;
 		this->isConnected = true;
