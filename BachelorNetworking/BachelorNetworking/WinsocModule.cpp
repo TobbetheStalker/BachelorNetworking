@@ -341,7 +341,7 @@ void WinsocModule::ReadMessagesFromClients()
 	Packet p;
 
 	//Check if there is data
-	int data_length = NetworkService::receiveMessage(this->m_TCP_ConenctedSocket, network_data, MAX_PACKET_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, network_data, MAX_PACKET_SIZE);
 	int data_read = 0;
 
 	// If there was no data
@@ -520,7 +520,7 @@ int WinsocModule::Calculate_AVG_Delay()
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
 		{
-			this->ReadMessagesFromClients();
+			this->Update();
 		}
 
 	}
