@@ -43,6 +43,7 @@ float RakNetModule::GetAvrgRTT()
 	{
 		result += *itr._Ptr;
 		count++;
+		itr++;
 	}
 
 	result = result / count;
@@ -104,7 +105,7 @@ void RakNetModule::Update()
 			printf("Our connection request has been accepted.\n");
 			break;
 		case ID_NEW_INCOMING_CONNECTION:
-			this->Send(DefaultMessageIDTypes::R_START_PING, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			//this->Send(DefaultMessageIDTypes::R_START_PING, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			printf("A connection is incoming.\n");
 			break;
 		case ID_NO_FREE_INCOMING_CONNECTIONS:
@@ -186,7 +187,7 @@ int RakNetModule::Calculate_AVG_Delay()
 	//Clear any reamining times
 	this->m_ping_times.clear();
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 300; i++)
 	{
 		//Start the clock
 		this->Clock_Start();
