@@ -37,7 +37,7 @@ struct DataPacket
 	PacketHeader	packet_type;		//4 bytes
 	int				nrOfPackets;		//4 bytes
 	int				ID;					//4 bytes
-	char			data[15000];		//15000 bytes
+	//char			data[50];		//15000 bytes
 
 
 };
