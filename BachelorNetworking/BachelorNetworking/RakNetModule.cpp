@@ -101,10 +101,10 @@ void RakNetModule::Update()
 			printf("Another client has connected.\n");
 			break;
 		case ID_CONNECTION_REQUEST_ACCEPTED:
-			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			printf("Our connection request has been accepted.\n");
 			break;
 		case ID_NEW_INCOMING_CONNECTION:
+			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			printf("A connection is incoming.\n");
 			break;
 		case ID_NO_FREE_INCOMING_CONNECTIONS:
