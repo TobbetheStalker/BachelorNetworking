@@ -186,7 +186,8 @@ int main(int argc, char *argv[])
 				}
 				else //Is set to be reciver
 				{
-					wsModule.TCP_Update(); //Only need to update
+					while(true)
+						wsModule.TCP_Update(); //Only need to update
 				}
 
 			}
@@ -221,7 +222,8 @@ int main(int argc, char *argv[])
 					}
 					else //Is set to be reciver
 					{
-						wsModule.UDP_Update(); //Only need to update
+						while(true)
+							wsModule.UDP_Update(); //Only need to update
 					}
 			}
 
@@ -233,30 +235,39 @@ int main(int argc, char *argv[])
 		{
 			rnModule.Initialize();
 
-			rnModule.Connect(ip);
-
-			//Take avg delay of the connection
-			avgDelayNS = rnModule.Calculate_AVG_Delay();
-
-			//Start Timer
-			rnModule.Clock_Start();
-
-			//Send data
-			rnModule.Send(DefaultMessageIDTypes::R_TEST, TEST, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
-
-			//Recive Last ack
-			while (rnModule.GetTransferComplete() == false)
+			if (isSender)
 			{
-				rnModule.Update();
+				rnModule.Connect(ip);
+
+				//Take avg delay of the connection
+				avgDelayNS = rnModule.Calculate_AVG_Delay();
+
+				//Start Timer
+				rnModule.Clock_Start();
+
+				//Send data
+				rnModule.Send(DefaultMessageIDTypes::R_TEST, TEST, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+
+				//Recive Last ack
+				while (rnModule.GetTransferComplete() == false)
+				{
+					rnModule.Update();
+				}
+
+				//Stop timer
+				timeNS = rnModule.Clock_Stop();
+
+				//Take time - avg delay
+				totalTimeNS = timeNS - avgDelayNS;
+				printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
+
 			}
-
-			//Stop timer
-			timeNS = rnModule.Clock_Stop();
-
-			//Take time - avg delay
-			totalTimeNS = timeNS - avgDelayNS;
-			printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
-
+			else
+			{
+				while (true)
+					rnModule.Update();
+			}
+			
 			rnModule.Shutdown();
 		}
 
