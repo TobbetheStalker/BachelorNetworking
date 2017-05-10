@@ -47,7 +47,6 @@ struct Packet
 struct RakNetPacket
 {
 	unsigned char	typeId;
-	PacketHeader	packet_type;
 
 };
 

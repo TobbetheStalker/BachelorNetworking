@@ -39,7 +39,7 @@ public:
 	void Update();
 
 	bool Connect(char* ip);
-	void Send(DefaultMessageIDTypes id, PacketHeader headertype, PacketPriority priority, PacketReliability reliability);
+	void Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability);
 	
 	int	Calculate_AVG_Delay();
 	void	Clock_Start();

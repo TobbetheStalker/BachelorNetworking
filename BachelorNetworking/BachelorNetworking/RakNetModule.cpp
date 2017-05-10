@@ -104,7 +104,7 @@ void RakNetModule::Update()
 			printf("Our connection request has been accepted.\n");
 			break;
 		case ID_NEW_INCOMING_CONNECTION:
-			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			this->Send(DefaultMessageIDTypes::R_START_PING, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			printf("A connection is incoming.\n");
 			break;
 		case ID_NO_FREE_INCOMING_CONNECTIONS:
@@ -117,9 +117,14 @@ void RakNetModule::Update()
 			printf("A client lost the connection.\n");
 			break;
 
+		case R_START_PING:
+			printf("Recived R_CLOCK_SYNC Packet");
+			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			break;
+
 		case R_CLOCK_SYNC:
 			printf("Recived R_CLOCK_SYNC Packet");
-			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC_RESPONSE, CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_CLOCK_SYNC_RESPONSE:
@@ -133,7 +138,7 @@ void RakNetModule::Update()
 
 		case R_TEST:
 			printf("Recived R_TEST Packet");
-			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_TRANSFER_COMPLETE :
@@ -157,12 +162,11 @@ bool RakNetModule::Connect(char * ip)
 	return 1;
 }
 
-void RakNetModule::Send(DefaultMessageIDTypes id, PacketHeader headertype, PacketPriority priority, PacketReliability reliability)
+void RakNetModule::Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability)
 {
 
 	RakNetPacket packet;
 	packet.typeId = id;
-	packet.packet_type = headertype;
 
 	peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet) , priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 }

@@ -434,6 +434,7 @@ enum DefaultMessageIDTypes
 	R_CLOCK_SYNC,
 	R_CLOCK_SYNC_RESPONSE,
 	R_TRANSFER_COMPLETE,
+	R_START_PING,
 	//-------------------------------------------------------------------------------------------------------------
  
 };
