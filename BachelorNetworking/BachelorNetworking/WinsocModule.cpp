@@ -176,11 +176,11 @@ void WinsocModule::UDP_Update()
 			printf("Recived CONNECTION_REQUEST Packet \n");
 			break;
 
-		case TEST:
-			p.deserialize(&network_data[data_read]);
+		case DATA:
+			//p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 
-			printf("Recived TEST Packet %d \n", p.packet_ID);
+			printf("Recived TEST Packet\n");
 			this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
 			break;
 
@@ -284,8 +284,6 @@ int WinsocModule::TCP_Connect(char * ip)
 
 		Packet packet;
 		packet.packet_type = CONNECTION_REQUEST;
-		packet.packet_ID = this->m_PacketID;
-		this->m_PacketID++;
 
 		packet.serialize(packet_data);
 
@@ -381,11 +379,11 @@ void WinsocModule::ReadMessagesFromClients()
 			printf("Recived CONNECTION_REQUEST Packet \n");
 			break;
 
-		case TEST :
-			p.deserialize(&network_data[data_read]);
+		case DATA:
+			//p.deserialize(&network_data[data_read]);
 			data_read += sizeof(Packet);
 			
-			printf("Recived TEST Packet %d \n", p.packet_ID);
+			printf("Recived TEST Packet \n");
 			this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
 			break;
 
@@ -447,8 +445,6 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 
 	Packet packet;
 	packet.packet_type = headertype;
-	packet.packet_ID = this->m_PacketID++;
-	packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
 
 	packet.serialize(packet_data);
 	NetworkService::sendMessage(this->m_TCP_SenderSocket, packet_data, packet_size);
@@ -466,8 +462,6 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 
 	Packet packet;
 	packet.packet_type = headertype;
-	packet.packet_ID = this->m_PacketID++;
-	packet.timeStamp = std::chrono::time_point<std::chrono::system_clock>::clock::now();
 
 	packet.serialize(packet_data);
 	//NetworkService::sendMessage(this->m_UDP_Socket, packet_data, packet_size);

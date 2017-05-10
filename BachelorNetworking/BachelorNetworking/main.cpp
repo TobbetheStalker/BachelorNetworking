@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 					wsModule.Clock_Start();
 
 					//Send data
-					wsModule.TCP_Send(TEST);
+					wsModule.TCP_Send(DATA);
 
 					//Recive Last ack
 					while (wsModule.GetTransferComplete() == false)
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 					wsModule.Clock_Start();
 
 					//Send data
-					wsModule.UDP_Send(TEST, ip);
+					wsModule.UDP_Send(DATA, ip);
 
 					//Recive Last ack
 					while (wsModule.GetTransferComplete() == false)
