@@ -509,7 +509,7 @@ int WinsocModule::Calculate_AVG_Delay()
 	//Clear any reamining times
 	this->m_ping_times.clear();
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 300; i++)
 	{
 		//Start the clock
 		this->Clock_Start();
