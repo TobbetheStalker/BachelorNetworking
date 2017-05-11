@@ -147,13 +147,14 @@ void RakNetModule::Update()
 			break;
 
 		case R_DATA:
-			printf("Recived R_DATA Packet %d of %d\n", dp->ID, dp->nrOfPackets);
+			
 			dp = (RakNetDataPacket*)RaKpacket->data;
 			this->dataCounter++;
 			if (this->dataCounter == dp->nrOfPackets)
 			{
 				this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			}
+			printf("Recived R_DATA Packet %d of %d\n", dp->ID, dp->nrOfPackets);
 			break;
 
 		case R_TRANSFER_COMPLETE :
