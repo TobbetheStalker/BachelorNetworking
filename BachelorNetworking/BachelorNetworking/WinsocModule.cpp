@@ -467,36 +467,17 @@ void WinsocModule::TCP_Send_Data()
 	QueryPerformanceCounter(&currTime);
 
 	//1GB = 1073741824 bytes;
-	int nrOfPackets = ceil(1073741824 / (sizeof(DataPacket)) );
 	const unsigned int packet_size = sizeof(DataPacket);
-	int counter = 0;
+	int nrOfPackets = ceil(1073741824 / packet_size);
 
 	DataPacket packet;
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
-	elapsedTime.QuadPart = 0;
 
-	while(counter <= nrOfPackets)
+	for(int i = 1; i <= nrOfPackets; i++)
 	{
+		packet.ID = i;
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
-		counter++;
-
-		//prevTime = currTime;
-		//QueryPerformanceCounter(&currTime);
-		//elapsedTime.QuadPart += currTime.QuadPart - prevTime.QuadPart;
-		////elapsedTime.QuadPart /= 1000000;
-		////elapsedTime.QuadPart /= frequency.QuadPart;
-		//
-		////IF more than a secound has past
-		//if ((float)elapsedTime.QuadPart > 1000.f)
-		//{
-		//	packet.ID = counter;
-
-		//	elapsedTime.QuadPart = 0;
-		//	printf("Sent DataPacket %d\n", counter);
-		//}
-
-		
 	}
 
 }
