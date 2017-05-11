@@ -460,7 +460,7 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 
 void WinsocModule::TCP_Send_Data()
 {
-	LARGE_INTEGER frequency, currTime, prevTime, elapsedTime, total;
+	LARGE_INTEGER frequency, currTime, prevTime, elapsedTime;
 	
 	QueryPerformanceFrequency(&frequency);
 	//QueryPerformanceCounter(&prevTime);
@@ -485,7 +485,7 @@ void WinsocModule::TCP_Send_Data()
 		//elapsedTime.QuadPart /= frequency.QuadPart;
 		
 		//IF more than a secound has past
-		if ((float)elapsedTime.QuadPart > 1000000.f)
+		if ((float)elapsedTime.QuadPart > 1000.f)
 		{
 			packet.ID = counter;
 			NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);

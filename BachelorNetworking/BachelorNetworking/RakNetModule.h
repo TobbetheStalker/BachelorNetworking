@@ -41,6 +41,7 @@ public:
 
 	bool Connect(char* ip);
 	void Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability);
+	void SendData();
 	
 	int	Calculate_AVG_Delay();
 	void	Clock_Start();

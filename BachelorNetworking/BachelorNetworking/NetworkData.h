@@ -37,7 +37,7 @@ struct DataPacket
 	PacketHeader	packet_type;		//4 bytes
 	int				nrOfPackets;		//4 bytes
 	int				ID;					//4 bytes
-	char			data[1000];		//15000 bytes
+	char			data[100];		//15000 bytes
 
 
 };
@@ -47,6 +47,14 @@ struct RakNetPacket
 {
 	unsigned char	typeId;
 
+};
+
+struct RakNetDataPacket
+{
+	unsigned char	typeId;
+	int				nrOfPackets;		//4 bytes
+	int				ID;					//4 bytes
+	char			data[100];		//15000 bytes
 };
 
 

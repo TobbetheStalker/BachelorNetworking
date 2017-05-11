@@ -144,7 +144,7 @@ void RakNetModule::Update()
 			printf("Recived R_CONNECTION_REQUEST Packet\n");
 			break;
 
-		case R_TEST:
+		case R_DATA:
 			printf("Recived R_TEST Packet\n");
 			this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
@@ -177,6 +177,45 @@ void RakNetModule::Send(DefaultMessageIDTypes id, PacketPriority priority, Packe
 	packet.typeId = id;
 
 	peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet) , priority, reliability, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+}
+
+void RakNetModule::SendData()
+{
+	RakNetDataPacket packet;
+	packet.typeId = R_DATA;
+
+	LARGE_INTEGER frequency, currTime, prevTime, elapsedTime;
+
+	QueryPerformanceFrequency(&frequency);
+	//QueryPerformanceCounter(&prevTime);
+	QueryPerformanceCounter(&currTime);
+
+	//1GB = 1073741824 bytes;
+	int nrOfPackets = ceil(1073741824 / (sizeof(DataPacket)));
+	const unsigned int packet_size = sizeof(DataPacket);
+	packet.nrOfPackets = nrOfPackets;
+	int counter = 0;
+	elapsedTime.QuadPart = 0;
+
+	while (counter <= nrOfPackets)
+	{
+		prevTime = currTime;
+		QueryPerformanceCounter(&currTime);
+		elapsedTime.QuadPart += currTime.QuadPart - prevTime.QuadPart;
+		//elapsedTime.QuadPart /= 1000000;
+		//elapsedTime.QuadPart /= frequency.QuadPart;
+
+		//IF more than a secound has past
+		if ((float)elapsedTime.QuadPart > 1000.f)
+		{
+			packet.ID = counter;
+			peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet), IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+			counter++;
+			elapsedTime.QuadPart = 0;
+			printf("Sent DataPacket %d\n", counter);
+		}
+	}
+
 }
 
 int RakNetModule::Calculate_AVG_Delay()
