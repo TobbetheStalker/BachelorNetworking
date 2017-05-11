@@ -90,7 +90,7 @@ void RakNetModule::Update()
 {
 	RakNet::Packet* RaKpacket;
 	RakNetPacket p;
-	RakNetDataPacket dp;
+	RakNetDataPacket* dp;
 
 	for (RaKpacket = peer->Receive(); RaKpacket; peer->DeallocatePacket(RaKpacket), RaKpacket = peer->Receive())
 	{
@@ -148,8 +148,9 @@ void RakNetModule::Update()
 
 		case R_DATA:
 			printf("Recived R_TEST Packet\n");
+			dp = (RakNetDataPacket*)RaKpacket->data;
 			this->dataCounter++;
-			if (this->dataCounter == dp.nrOfPackets)
+			if (this->dataCounter == dp->nrOfPackets)
 			{
 				this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			}
