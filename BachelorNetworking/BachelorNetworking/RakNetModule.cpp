@@ -147,7 +147,7 @@ void RakNetModule::Update()
 			break;
 
 		case R_DATA:
-			printf("Recived R_DATA Packet %d of %d\n", dp.ID, dp.nrOfPackets);
+			printf("Recived R_DATA Packet %d of %d\n", dp->ID, dp->nrOfPackets);
 			dp = (RakNetDataPacket*)RaKpacket->data;
 			this->dataCounter++;
 			if (this->dataCounter == dp->nrOfPackets)
