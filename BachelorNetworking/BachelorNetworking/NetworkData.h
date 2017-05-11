@@ -2,7 +2,7 @@
 #define NETWORKDATA_H
 
 #define MAX_PACKET_SIZE 100000
-#define BUFFER_SIZE 314572800
+#define BUFFER_SIZE 1073741824//314572800
 //const int GIGABYTE = 1073741824;
 
 #include <string>
@@ -38,7 +38,7 @@ struct DataPacket
 	PacketHeader	packet_type;		//4 bytes
 	int				nrOfPackets;		//4 bytes
 	int				ID;					//4 bytes
-	char			data[100];		//15000 bytes
+	char			data[100];		//100 bytes
 
 
 };
@@ -55,7 +55,7 @@ struct RakNetDataPacket
 	unsigned char	typeId;
 	int				nrOfPackets;		//4 bytes
 	int				ID;					//4 bytes
-	char			data[100];		//15000 bytes
+	char			data[100];		//100 bytes
 };
 
 

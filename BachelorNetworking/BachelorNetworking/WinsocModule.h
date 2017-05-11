@@ -72,7 +72,8 @@ public:
 	void	TCP_Send(PacketHeader headertype);
 	void	TCP_Send_Data();
 	void	UDP_Send(PacketHeader headertype, char* ip);
-	
+	void	UDP_Send_Data(char* ip);
+
 	int		Calculate_AVG_Delay();	//TCP
 	int		Calculate_AVG_Delay(char* ip);	//UDP
 	bool	GetIsConnected();
