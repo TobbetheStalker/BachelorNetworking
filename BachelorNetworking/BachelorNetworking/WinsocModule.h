@@ -35,6 +35,7 @@ private:
 	std::string	m_IP;
 
 	Protocol m_CurrentProtocol;
+	char** network_data;
 
 	std::chrono::time_point<std::chrono::steady_clock> m_start_time;
 	std::vector<int>	m_ping_times;

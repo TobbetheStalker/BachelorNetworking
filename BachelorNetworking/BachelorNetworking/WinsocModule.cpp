@@ -13,6 +13,7 @@ WinsocModule::WinsocModule()
 	this->isConnected = false;
 	this->tranferComplete = false;
 	this->dataCounter = 0;
+	this->network_data = new char*[314572800];
 }
 
 WinsocModule::~WinsocModule()
@@ -337,7 +338,7 @@ bool WinsocModule::AcceptNewClient()
 void WinsocModule::ReadMessagesFromClients()
 {
 
-	char network_data[MAX_PACKET_SIZE];	// The data buffer that will hold the incoming data
+		// The data buffer that will hold the incoming data
 	unsigned int header = -1;			// The header variable that will hold the loaded header
 
 	// The objects to load the data into
@@ -345,7 +346,7 @@ void WinsocModule::ReadMessagesFromClients()
 	DataPacket dp;
 
 	//Check if there is data
-	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, network_data, MAX_PACKET_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket,*this->network_data, MAX_PACKET_SIZE);
 	int data_read = 0;
 
 	// If there was no data
@@ -358,7 +359,7 @@ void WinsocModule::ReadMessagesFromClients()
 	while (data_read != data_length)
 	{
 		//Read the header (skip the first 4 bytes since it is virtual function information)
-		memcpy(&header, &network_data[data_read], sizeof(PacketHeader));
+		memcpy(&header, &this->network_data[data_read], sizeof(PacketHeader));
 
 		switch (header)
 		{
