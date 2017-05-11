@@ -385,7 +385,7 @@ void WinsocModule::ReadMessagesFromClients()
 
 		case DATA:
 			memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
-			printf("Recived CONNECTION_REQUEST Packet %d of %d\n", dp.ID, dp.nrOfPackets);
+			printf("Recived DATA Packet %d of %d\n", dp.ID, dp.nrOfPackets);
 			this->dataCounter++;
 			if (this->dataCounter == dp.nrOfPackets)
 			{

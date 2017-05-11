@@ -147,7 +147,7 @@ void RakNetModule::Update()
 			break;
 
 		case R_DATA:
-			printf("Recived R_TEST Packet\n");
+			printf("Recived R_DATA Packet %d of %d\n", dp.ID, dp.nrOfPackets);
 			dp = (RakNetDataPacket*)RaKpacket->data;
 			this->dataCounter++;
 			if (this->dataCounter == dp->nrOfPackets)
@@ -213,7 +213,7 @@ void RakNetModule::SendData()
 		//elapsedTime.QuadPart /= frequency.QuadPart;
 
 		//IF more than a secound has past
-		if ((float)elapsedTime.QuadPart > 1000.f)
+		if ((float)elapsedTime.QuadPart > 0.1f)
 		{
 			packet.ID = counter;
 			peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet), IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
