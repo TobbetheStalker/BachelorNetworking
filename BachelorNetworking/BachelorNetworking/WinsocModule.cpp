@@ -460,7 +460,7 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 
 void WinsocModule::TCP_Send_Data()
 {
-	LARGE_INTEGER frequency, currTime, prevTime, elapsedTime;
+	LARGE_INTEGER frequency, currTime, prevTime, elapsedTime, total;
 	
 	QueryPerformanceFrequency(&frequency);
 	//QueryPerformanceCounter(&prevTime);
@@ -474,20 +474,23 @@ void WinsocModule::TCP_Send_Data()
 	DataPacket packet;
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
-	
+	elapsedTime.QuadPart = 0;
+
 	while(counter <= nrOfPackets)
 	{
 		prevTime = currTime;
 		QueryPerformanceCounter(&currTime);
-		elapsedTime.QuadPart = currTime.QuadPart - prevTime.QuadPart;
-		elapsedTime.QuadPart /= 1000000;
-		elapsedTime.QuadPart /= frequency.QuadPart;
+		elapsedTime.QuadPart += currTime.QuadPart - prevTime.QuadPart;
+		//elapsedTime.QuadPart /= 1000000;
+		//elapsedTime.QuadPart /= frequency.QuadPart;
 		
-		if ((float)elapsedTime.QuadPart < 1.f)
+		//IF more than a secound has past
+		if ((float)elapsedTime.QuadPart > 1000000.f)
 		{
 			packet.ID = counter;
 			NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
 			counter++;
+			elapsedTime.QuadPart = 0;
 			printf("Sent DataPacket %d\n", counter);
 		}
 
