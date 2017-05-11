@@ -476,7 +476,7 @@ void WinsocModule::TCP_Send_Data()
 	{
 		packet.ID = i;
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
-		printf("Sent DataPacket %d", i);
+		printf("Sent DataPacket %d\n", i);
 	}
 
 }
@@ -506,7 +506,7 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 		}
 		else
 		{
-			printf("Sent DataPacket %d", i);
+			printf("Sent DataPacket %d\n", i);
 		}
 	}
 
