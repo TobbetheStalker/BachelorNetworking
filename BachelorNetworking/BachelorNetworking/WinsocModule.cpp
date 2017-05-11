@@ -466,7 +466,7 @@ void WinsocModule::TCP_Send_Data()
 {
 	//1GB = 1073741824 bytes;
 	const unsigned int packet_size = sizeof(DataPacket);
-	int nrOfPackets = ceil(1073741824 / packet_size);
+	int nrOfPackets = ceil(3741824 / packet_size);
 
 	DataPacket packet;
 	packet.packet_type = DATA;
@@ -476,6 +476,7 @@ void WinsocModule::TCP_Send_Data()
 	{
 		packet.ID = i;
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
+		printf("Sent DataPacket %d", i);
 	}
 
 }
@@ -489,15 +490,26 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 
 	const unsigned int packet_size = sizeof(Packet);
 
-	Packet packet;
-	packet.packet_type = headertype;
+	int nrOfPackets = ceil(3741824 / packet_size);
+	DataPacket packet;
+	packet.packet_type = DATA;
+	packet.nrOfPackets = nrOfPackets;
 
 	//NetworkService::sendMessage(this->m_UDP_Socket, packet_data, packet_size);
 	
-	if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+	for (int i = 0; i < nrOfPackets; i++)
 	{
-		printf("sendto() failed with error code : %d \n", WSAGetLastError());
+		packet.ID = i;
+		if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+		{
+			printf("sendto() failed with error code : %d \n", WSAGetLastError());
+		}
+		else
+		{
+			printf("Sent DataPacket %d", i);
+		}
 	}
+
 }
 
 void WinsocModule::UDP_Send_Data(char * ip)

@@ -3,7 +3,7 @@
 
 #define MAX_PACKET_SIZE 100000
 #define BUFFER_SIZE 1073741824//314572800
-//const int GIGABYTE = 1073741824;
+#define GIGABYTE = 1073741824;
 
 #include <string>
 #include <chrono>
