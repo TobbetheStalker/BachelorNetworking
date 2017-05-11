@@ -13,7 +13,7 @@ WinsocModule::WinsocModule()
 	this->isConnected = false;
 	this->tranferComplete = false;
 	this->dataCounter = 0;
-	this->network_data = new char*[BUFFER_SIZE];
+	this->network_data = new char[BUFFER_SIZE];
 }
 
 WinsocModule::~WinsocModule()
@@ -136,7 +136,7 @@ void WinsocModule::UDP_Update()
 	memset(network_data, '\0', MAX_PACKET_SIZE);
 
 	//try to receive some data, this is a blocking call
-	if ((data_length = recvfrom(this->m_UDP_Socket, *network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
+	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
 		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
 		//exit(EXIT_FAILURE);
@@ -345,7 +345,7 @@ void WinsocModule::ReadMessagesFromClients()
 	DataPacket dp;
 
 	//Check if there is data
-	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket,*this->network_data, BUFFER_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
 	int data_read = 0;
 
 	// If there was no data
