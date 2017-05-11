@@ -23,6 +23,8 @@ private:
 	int					m_Avg_Delay;
 	bool				transferComplete;
 	bool				isConnected;
+	int					dataCounter;
+
 
 public:
 
