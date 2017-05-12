@@ -436,6 +436,7 @@ void WinsocModule::TCP_WaitForData()
 	{
 		this->TCP_Send(TRANSFER_COMPLETE);
 		printf("Sent TRANSFER_COMPLETE\n");
+		data_total = 0;
 	}
 }
 
@@ -488,7 +489,7 @@ void WinsocModule::TCP_Send_Data()
 {
 	//1GB = 1073741824 bytes;
 	const unsigned int packet_size = sizeof(DataPacket);
-	int nrOfPackets = ceil(DATA_SIZE / packet_size);
+	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
 
 	DataPacket packet;
 	packet.packet_type = DATA;

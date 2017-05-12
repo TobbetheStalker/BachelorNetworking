@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
 						//Stop timer
 						timeNS = wsModule.Clock_Stop();
-						printf("Average Delay: %d ns", avgDelayNS);
+						printf("Average Delay: %d ns", timeNS);
 					}
 							
 						
