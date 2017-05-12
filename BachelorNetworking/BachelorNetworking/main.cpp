@@ -248,12 +248,6 @@ int main(int argc, char *argv[])
 				}
 				else //Is set to be reciver
 				{
-					while (wsModule.GetIsConnected() != true)
-					{
-						wsModule.Update();
-
-					}
-
 					if (ping == true)
 					{
 						while (true)

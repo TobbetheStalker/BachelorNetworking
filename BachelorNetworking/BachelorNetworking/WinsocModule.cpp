@@ -439,11 +439,6 @@ void WinsocModule::UDP_WaitForData()
 	struct sockaddr_in si_other;
 	int slen = sizeof(si_other);
 
-	fflush(stdout);
-
-	//clear the buffer by filling null, it might have previously received data
-	memset(network_data, '\0', BUFFER_SIZE);
-
 	//try to receive some data, this is a blocking call
 	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
@@ -559,7 +554,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 
 	//1GB = 1073741824 bytes;
 	const unsigned int packet_size = sizeof(DataPacket);
-	int nrOfPackets = ceil(DATA_SIZE / packet_size);
+	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
 
 	DataPacket packet;
 	packet.packet_type = DATA;
@@ -772,6 +767,14 @@ int WinsocModule::UDP_Initialize()
 
 	iResult = bind(this->m_UDP_Socket, (sockaddr *)&local, sizeof(local));
 
+	if (iResult == SOCKET_ERROR) {
+		printf("bind failed with error: %d\n", WSAGetLastError());
+		closesocket(this->m_UDP_Socket);
+		WSACleanup();
+		return 0;
+	}
+
+	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "3741824", sizeof("3741824"));
 	if (iResult == SOCKET_ERROR) {
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
