@@ -130,17 +130,8 @@ void WinsocModule::UDP_Update()
 	Packet p;
 	DataPacket dp;
 
-	fflush(stdout);
-
-	//clear the buffer by filling null, it might have previously received data
-	//memset(network_data, '\0', MAX_PACKET_SIZE);
-
 	//try to receive some data, this is a blocking call
-	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
-	{
-		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
-		//exit(EXIT_FAILURE);
-	}
+	data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
 
 	// If there was no data
 	if (data_length <= 0)
@@ -554,10 +545,8 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	Packet packet;
 	packet.packet_type = headertype;
 
-	if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
-	{
-		printf("sendto() failed with error code : %d \n", WSAGetLastError());
-	}
+	sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr));
+
 	
 }
 
