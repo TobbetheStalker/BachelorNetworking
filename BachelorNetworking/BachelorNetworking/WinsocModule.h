@@ -33,7 +33,7 @@ private:
 	int			m_ClientID;
 	int			m_PacketID;
 	std::string	m_IP;
-
+	int total = 0;
 	Protocol m_CurrentProtocol;
 	char* network_data;
 

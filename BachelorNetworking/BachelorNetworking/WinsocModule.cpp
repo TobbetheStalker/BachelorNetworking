@@ -339,12 +339,12 @@ void WinsocModule::ReadMessagesFromClients()
 {
 
 		// The data buffer that will hold the incoming data
-	unsigned int header = -1;			// The header variable that will hold the loaded header
-	int old = -1;
-	// The objects to load the data into
-	Packet p;
-	DataPacket dp;
-
+	//unsigned int header = -1;			// The header variable that will hold the loaded header
+	//int old = -1;
+	//// The objects to load the data into
+	//Packet p;
+	//DataPacket dp;
+	//int j = 0;
 	//Check if there is data
 	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
 	int data_read = 0;
@@ -355,65 +355,67 @@ void WinsocModule::ReadMessagesFromClients()
 		//No data recieved, end the function
 		return;
 	}
-	
-	while (data_read != data_length)
-	{
-		//Read the header (skip the first 4 bytes since it is virtual function information)
-		//memcpy(&header, &this->network_data[data_read], sizeof(PacketHeader));
-		header = network_data[data_read];
-		switch (header)
-		{
-			
-		case CLOCK_SYNC :
-			//Resend a PING_RESPONSE
-			this->TCP_Send(CLOCK_SYNC_RESPONSE);
-			printf("Recived CLOCK_SYNC Packet \n");
-			data_read += sizeof(Packet);
-			break;
+	this->total += data_length;
+	printf("%d\n",total);
+	//while (data_read != data_length)
+	//{
+	//	//Read the header (skip the first 4 bytes since it is virtual function information)
+	//	//memcpy(&header, &this->network_data[data_read], sizeof(PacketHeader));
+	//	header = network_data[data_read];
+	//	switch (header)
+	//	{
+	//		
+	//	case CLOCK_SYNC :
+	//		//Resend a PING_RESPONSE
+	//		this->TCP_Send(CLOCK_SYNC_RESPONSE);
+	//		printf("Recived CLOCK_SYNC Packet \n");
+	//		data_read += sizeof(Packet);
+	//		break;
 
-		case CLOCK_SYNC_RESPONSE:
-			
-			this->Clock_Stop();
-			printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
-			data_read += sizeof(Packet);
-			break;
+	//	case CLOCK_SYNC_RESPONSE:
+	//		
+	//		this->Clock_Stop();
+	//		printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
+	//		data_read += sizeof(Packet);
+	//		break;
 
-		case CONNECTION_REQUEST :
-			data_read += sizeof(Packet);
+	//	case CONNECTION_REQUEST :
+	//		data_read += sizeof(Packet);
 
-			printf("Recived CONNECTION_REQUEST Packet \n");
-			break;
+	//		printf("Recived CONNECTION_REQUEST Packet \n");
+	//		break;
 
-		case DATA:
-			old = data_read;
-			memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
-			printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
-			printf("%d \n",(this->dataCounter + 1) );
-			this->dataCounter++;
-			if (this->dataCounter == dp.nrOfPackets)
-			{
-				this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
-			}
-			
-			data_read += sizeof(DataPacket);
-			
-			break;
+	//	case DATA:
+	//		old = data_read;
+	//		memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
+	//		printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
+	//		printf("%d \n",(this->dataCounter + 1) );
+	//		this->dataCounter++;
+	//		if (this->dataCounter == dp.nrOfPackets)
+	//		{
+	//			this->TCP_Send(PacketHeader::TRANSFER_COMPLETE);
+	//		}
+	//		
+	//		data_read += sizeof(DataPacket);
+	//		
+	//		break;
 
-		case TRANSFER_COMPLETE :
-			printf("Recived TRANSFER_COMPLETE Packet \n");
-			data_read += sizeof(Packet);
-			this->tranferComplete = true;
-			this->dataCounter = 0;
-			break;
+	//	case TRANSFER_COMPLETE :
+	//		printf("Recived TRANSFER_COMPLETE Packet \n");
+	//		data_read += sizeof(Packet);
+	//		this->tranferComplete = true;
+	//		this->dataCounter = 0;
+	//		break;
 
-		default:
-			this->dataCounter++;
-			printf("Unkown packet type %d, %d\n", header, this->dataCounter);
-			data_read = data_length;
-			break;
-		}
-
-	}
+	//	default:
+	//		this->dataCounter++;
+	//		printf("Unkown packet type %d, %d\n", header, this->dataCounter);
+	//		data_read = data_length;
+	//		j++;
+	//		break;
+	//	}
+	//	printf("%d\n",j);
+	//}
 
 }
 
