@@ -430,10 +430,12 @@ void WinsocModule::TCP_WaitForData()
 	}
 
 	this->data_total += data_length;
-
+	printf("%d\n",this->data_total);
+	
 	if (data_total >= DATA_SIZE)
 	{
 		this->TCP_Send(TRANSFER_COMPLETE);
+		printf("Sent TRANSFER_COMPLETE\n");
 	}
 }
 
@@ -486,7 +488,7 @@ void WinsocModule::TCP_Send_Data()
 {
 	//1GB = 1073741824 bytes;
 	const unsigned int packet_size = sizeof(DataPacket);
-	int nrOfPackets = ceil(3741824 / packet_size);
+	int nrOfPackets = ceil(DATA_SIZE / packet_size);
 
 	DataPacket packet;
 	packet.packet_type = DATA;
@@ -510,7 +512,7 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 
 	const unsigned int packet_size = sizeof(Packet);
 
-	int nrOfPackets = ceil(3741824 / packet_size);
+	int nrOfPackets = ceil(DATA_SIZE / packet_size);
 	DataPacket packet;
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
@@ -541,7 +543,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 
 	//1GB = 1073741824 bytes;
 	const unsigned int packet_size = sizeof(DataPacket);
-	int nrOfPackets = ceil(1073741824 / packet_size);
+	int nrOfPackets = ceil(DATA_SIZE / packet_size);
 
 	DataPacket packet;
 	packet.packet_type = DATA;

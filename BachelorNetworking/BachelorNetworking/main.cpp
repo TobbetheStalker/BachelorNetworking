@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 					}
 				
 
-					if (ping == true)	//Calculate deöay
+					if (ping == true)	//Calculate delay
 					{
 						//Take avg delay of the connection
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
@@ -194,6 +194,12 @@ int main(int argc, char *argv[])
 				}
 				else //Is set to be reciver
 				{
+					while (wsModule.GetIsConnected() != true)
+					{
+						wsModule.Update();
+
+					}
+
 					if (ping == true)
 					{
 						while(true)
