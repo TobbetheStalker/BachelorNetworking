@@ -440,6 +440,44 @@ void WinsocModule::TCP_WaitForData()
 	}
 }
 
+void WinsocModule::UDP_WaitForData()
+{
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
+	int data_read = 0;
+
+	struct sockaddr_in si_other;
+	int slen = sizeof(si_other);
+
+	fflush(stdout);
+
+	//clear the buffer by filling null, it might have previously received data
+	memset(network_data, '\0', BUFFER_SIZE);
+
+	//try to receive some data, this is a blocking call
+	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
+	{
+		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
+		//exit(EXIT_FAILURE);
+	}
+
+	// If there was no data
+	if (data_length <= 0)
+	{
+		//No data recieved, end the function
+		return;
+	}
+
+	this->data_total += data_length;
+	printf("%d\n", this->data_total);
+
+	if (data_total >= DATA_SIZE)
+	{
+		this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
+		printf("Sent TRANSFER_COMPLETE\n");
+		data_total = 0;
+	}
+}
+
 int WinsocModule::GetMyIp()
 {
 	char ac[80];
@@ -513,26 +551,14 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 
 	const unsigned int packet_size = sizeof(Packet);
 
-	int nrOfPackets = ceil(DATA_SIZE / packet_size);
-	DataPacket packet;
+	Packet packet;
 	packet.packet_type = DATA;
-	packet.nrOfPackets = nrOfPackets;
 
-	//NetworkService::sendMessage(this->m_UDP_Socket, packet_data, packet_size);
-	
-	for (int i = 0; i < nrOfPackets; i++)
+	if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
 	{
-		packet.ID = i;
-		if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
-		{
-			printf("sendto() failed with error code : %d \n", WSAGetLastError());
-		}
-		else
-		{
-			printf("Sent DataPacket %d\n", i);
-		}
+		printf("sendto() failed with error code : %d \n", WSAGetLastError());
 	}
-
+	
 }
 
 void WinsocModule::UDP_Send_Data(char * ip)
@@ -556,6 +582,10 @@ void WinsocModule::UDP_Send_Data(char * ip)
 		if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
 		{
 			printf("sendto() failed with error code : %d \n", WSAGetLastError());
+		}
+		else
+		{
+			printf("Sent DataPacket %d\n", i);
 		}
 	}
 

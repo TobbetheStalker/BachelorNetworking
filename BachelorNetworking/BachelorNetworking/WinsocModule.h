@@ -69,6 +69,7 @@ public:
 	void	Update();
 	void	TCP_Update();
 	void	TCP_WaitForData();
+	void	UDP_WaitForData();
 	void	UDP_Update();
 	int		TCP_Connect(char* ip);
 

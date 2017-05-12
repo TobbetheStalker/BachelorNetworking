@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
 						//Stop timer
 						timeNS = wsModule.Clock_Stop();
-						printf("Average Delay: %d ns", timeNS);
+						printf("Average Delay: %d ns\n", timeNS);
 					}
 							
 						
@@ -219,35 +219,62 @@ int main(int argc, char *argv[])
 				if (isSender)	//Is set to be the sender
 				{
 
-					//Take avg delay of the connection
-					avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
+					wsModule.TCP_Connect(ip);
 
-
-					//Start Timer
-					wsModule.Clock_Start();
-
-					//Send data
-					wsModule.UDP_Send(DATA, ip);
-
-					//Recive Last ack
-					while (wsModule.GetTransferComplete() == false)
+					//Wait for connection, not really needed since TCP blocks until connection
+					while (wsModule.GetIsConnected() != true)
 					{
-						wsModule.UDP_Update();
+						wsModule.Update();
 					}
 
-					//Stop timer
-					timeNS = wsModule.Clock_Stop();
 
-					//Take time - avg delay
-					totalTimeNS = timeNS - avgDelayNS;
-					printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
+					if (ping == true)	//Calculate delay
+					{
+						//Take avg delay of the connection
+						avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
+						printf("Average Delay: %d ns", avgDelayNS);
+					}
+					else //Time data
+					{
+						//Start Timer
+						wsModule.Clock_Start();
+
+						//Send data
+						wsModule.UDP_Send_Data(ip);
+
+						//Recive Last ack
+						while (wsModule.GetTransferComplete() == false)
+						{
+							wsModule.UDP_Update();
+						}
+
+						//Stop timer
+						timeNS = wsModule.Clock_Stop();
+						printf("Average Delay: %d ns\n", timeNS);
+					}
+
+
+				}
+				else //Is set to be reciver
+				{
+					while (wsModule.GetIsConnected() != true)
+					{
+						wsModule.Update();
 
 					}
-					else //Is set to be reciver
+
+					if (ping == true)
 					{
-						while(true)
+						while (true)
 							wsModule.UDP_Update(); //Only need to update
 					}
+					else
+					{
+						while (true)
+							wsModule.UDP_WaitForData(); //Only need to update
+					}
+
+				}
 			}
 
 			wsModule.Shutdown();
