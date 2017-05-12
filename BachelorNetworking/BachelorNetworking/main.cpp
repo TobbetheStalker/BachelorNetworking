@@ -13,6 +13,7 @@ Protocol p = Protocol::NONE;
 std::string filename = "log";
 char* ip = "";
 bool isSender = false;
+bool ping = false;
 
 
 
@@ -107,7 +108,10 @@ bool SetParam(int argc, char* argv[])
 				return 0;
 			}
 		}
-			
+		else if (arg == "-p")
+		{
+			ping = true;
+		}
 	}
 
 
@@ -153,8 +157,6 @@ int main(int argc, char *argv[])
 				{
 					
 					wsModule.TCP_Connect(ip);
-
-					wsModule.TCP_Update();
 					
 					//Wait for connection, not really needed since TCP blocks until connection
 					while (wsModule.GetIsConnected() != true)
@@ -162,33 +164,47 @@ int main(int argc, char *argv[])
 						wsModule.Update();
 					}
 				
-					//Take avg delay of the connection
-					avgDelayNS = wsModule.Calculate_AVG_Delay();
-							
-					//Start Timer
-					wsModule.Clock_Start();
 
-					//Send data
-					wsModule.TCP_Send_Data();
-
-					//Recive Last ack
-					while (wsModule.GetTransferComplete() == false)
+					if (ping == true)	//Calculate deöay
 					{
-						wsModule.TCP_Update();
+						//Take avg delay of the connection
+						avgDelayNS = wsModule.Calculate_AVG_Delay();
+						printf("Average Delay: %d ns", avgDelayNS);
 					}
+					else //Time data
+					{
+						//Start Timer
+						wsModule.Clock_Start();
 
-					//Stop timer
-					timeNS = wsModule.Clock_Stop();
-						
-					//Take time - avg delay
-					totalTimeNS = timeNS - avgDelayNS;
-					printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
+						//Send data
+						wsModule.TCP_Send_Data();
+
+						//Recive Last ack
+						while (wsModule.GetTransferComplete() == false)
+						{
+							wsModule.TCP_Update();
+						}
+
+						//Stop timer
+						timeNS = wsModule.Clock_Stop();
+						printf("Average Delay: %d ns", avgDelayNS);
+					}
+							
 						
 				}
 				else //Is set to be reciver
 				{
-					while(true)
-						wsModule.TCP_Update(); //Only need to update
+					if (ping == true)
+					{
+						while(true)
+							wsModule.TCP_Update(); //Only need to update
+					}
+					else
+					{
+						while (true)
+							wsModule.TCP_WaitForData(); //Only need to update
+					}
+					
 				}
 
 			}

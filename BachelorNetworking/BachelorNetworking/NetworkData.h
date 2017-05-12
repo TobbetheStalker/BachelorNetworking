@@ -4,6 +4,7 @@
 #define MAX_PACKET_SIZE 100000
 #define BUFFER_SIZE 1073741824//314572800
 #define GIGABYTE = 1073741824;
+const int DATA_SIZE = 100;
 
 #include <string>
 #include <chrono>

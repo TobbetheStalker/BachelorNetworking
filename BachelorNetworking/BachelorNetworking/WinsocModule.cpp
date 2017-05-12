@@ -417,6 +417,26 @@ void WinsocModule::ReadMessagesFromClients()
 
 }
 
+void WinsocModule::TCP_WaitForData()
+{
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
+	int data_read = 0;
+
+	// If there was no data
+	if (data_length <= 0)
+	{
+		//No data recieved, end the function
+		return;
+	}
+
+	this->data_total += data_length;
+
+	if (data_total >= DATA_SIZE)
+	{
+		this->TCP_Send(TRANSFER_COMPLETE);
+	}
+}
+
 int WinsocModule::GetMyIp()
 {
 	char ac[80];

@@ -44,12 +44,14 @@ private:
 	bool				isConnected;
 	bool				tranferComplete;
 	int					dataCounter;
+	int					data_total;
 
 public:
 
 private:
 	bool	AcceptNewClient();
 	void	ReadMessagesFromClients();
+
 	int		GetMyIp();
 
 	int		TCP_Initialize(bool noDelay);
@@ -66,6 +68,7 @@ public:
 	int		Shutdown();
 	void	Update();
 	void	TCP_Update();
+	void	TCP_WaitForData();
 	void	UDP_Update();
 	int		TCP_Connect(char* ip);
 
