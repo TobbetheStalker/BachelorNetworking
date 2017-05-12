@@ -219,15 +219,6 @@ int main(int argc, char *argv[])
 				if (isSender)	//Is set to be the sender
 				{
 
-					wsModule.TCP_Connect(ip);
-
-					//Wait for connection, not really needed since TCP blocks until connection
-					while (wsModule.GetIsConnected() != true)
-					{
-						wsModule.Update();
-					}
-
-
 					if (ping == true)	//Calculate delay
 					{
 						//Take avg delay of the connection
