@@ -151,39 +151,39 @@ int main(int argc, char *argv[])
 
 				if (isSender)	//Is set to be the sender
 				{
-					
+					//
 					wsModule.TCP_Connect(ip);
 
-					wsModule.TCP_Update();
-					
-					//Wait for connection, not really needed since TCP blocks until connection
-					while (wsModule.GetIsConnected() != true)
-					{
-						wsModule.Update();
-					}
+					//wsModule.TCP_Update();
+					//
+					////Wait for connection, not really needed since TCP blocks until connection
+					//while (wsModule.GetIsConnected() != true)
+					//{
+					//	wsModule.Update();
+					//}
 				
-					//Take avg delay of the connection
-					avgDelayNS = wsModule.Calculate_AVG_Delay();
-							
-					//Start Timer
-					wsModule.Clock_Start();
+					////Take avg delay of the connection
+					//avgDelayNS = wsModule.Calculate_AVG_Delay();
+					//		
+					////Start Timer
+					//wsModule.Clock_Start();
 
-					//Send data
+					////Send data
 					wsModule.TCP_Send_Data();
 
-					//Recive Last ack
-					while (wsModule.GetTransferComplete() == false)
-					{
-						wsModule.TCP_Update();
-					}
+					////Recive Last ack
+					//while (wsModule.GetTransferComplete() == false)
+					//{
+					//	wsModule.TCP_Update();
+					//}
 
-					//Stop timer
-					timeNS = wsModule.Clock_Stop();
-						
-					//Take time - avg delay
-					totalTimeNS = timeNS - avgDelayNS;
-					printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
-						
+					////Stop timer
+					//timeNS = wsModule.Clock_Stop();
+					//	
+					////Take time - avg delay
+					//totalTimeNS = timeNS - avgDelayNS;
+					//printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
+					//	
 				}
 				else //Is set to be reciver
 				{

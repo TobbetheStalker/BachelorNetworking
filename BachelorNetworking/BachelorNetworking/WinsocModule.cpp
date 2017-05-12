@@ -227,7 +227,7 @@ int WinsocModule::TCP_Connect(char * ip)
 		hints.ai_protocol = IPPROTO_TCP;    // Set to use TCP
 
 		// Resolve the server address and port
-		int iResult = getaddrinfo(ip, DEFAULT_PORT, &hints, &result);
+		int iResult = getaddrinfo(ip, "6881", &hints, &result);
 
 		if (iResult != 0)
 		{

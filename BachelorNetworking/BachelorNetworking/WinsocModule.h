@@ -19,7 +19,7 @@
 #define PACKETOFFSET 4
 #endif
 
-#define DEFAULT_PORT "6881"
+#define DEFAULT_PORT "6882"
 
 class WinsocModule
 {
