@@ -567,7 +567,10 @@ void WinsocModule::UDP_Send_Data(char * ip)
 
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
-		sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
+		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
+		{
+			printf("ERROR");
+		}
 		printf("Sent DataPacket %d\n", i);
 	}
 
