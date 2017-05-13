@@ -454,7 +454,7 @@ void WinsocModule::UDP_WaitForData()
 	int slen = sizeof(si_other);
 
 	//try to receive some data, this is a blocking call
-	if ((data_length = recvfrom(this->m_UDP_Socket, UDP_network_data, 300000000, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
+	if ((data_length = recvfrom(this->m_UDP_Socket, this->UDP_network_data, 300000000, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
 		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
 		//exit(EXIT_FAILURE);
@@ -564,7 +564,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	//1GB = 1073741824 bytes;
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
-	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 1;
+	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 10;
 
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
