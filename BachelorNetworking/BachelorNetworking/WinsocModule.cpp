@@ -779,7 +779,9 @@ int WinsocModule::UDP_Initialize()
 	//read_timeout.tv_sec = 0;
 	//read_timeout.tv_usec = 10;
 
-	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_DONTLINGER, "1", sizeof("1"));
+	int iTimeout = 0;
+	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&iTimeout, sizeof(iTimeout));
+	
 	if (iResult == SOCKET_ERROR) {
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
