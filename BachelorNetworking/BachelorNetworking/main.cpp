@@ -135,10 +135,8 @@ int main(int argc, char *argv[])
 	bool conrq = false;
 	bool calcDelay = false;
 	int avgDelayNS = 0;
-	int timeNS = 0;
+	int timeMS = 0;
 	int totalTimeNS = 0;
-	HANDLE threadH;
-	DWORD threadID;
 
 	if (SetParam(argc, argv)) 
 	{
@@ -186,8 +184,8 @@ int main(int argc, char *argv[])
 						}
 
 						//Stop timer
-						timeNS = wsModule.Clock_Stop();
-						printf("Average Delay: %d ns\n", timeNS);
+						timeMS = wsModule.Clock_Stop(true);
+						printf("Average Delay: %d ms\n", timeMS);
 					}
 							
 						
@@ -240,8 +238,8 @@ int main(int argc, char *argv[])
 						}
 
 						//Stop timer
-						timeNS = wsModule.Clock_Stop();
-						printf("Average Delay: %d ns\n", timeNS);
+						timeMS = wsModule.Clock_Stop(true);
+						printf("Total time: %d ms\n", timeMS);
 					}
 
 
@@ -296,10 +294,10 @@ int main(int argc, char *argv[])
 				}
 
 				//Stop timer
-				timeNS = rnModule.Clock_Stop();
+				timeMS = rnModule.Clock_Stop(true);
 
 				//Take time - avg delay
-				totalTimeNS = timeNS - avgDelayNS;
+				totalTimeNS = timeMS - avgDelayNS;
 				printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
 
 			}

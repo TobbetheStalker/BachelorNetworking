@@ -279,6 +279,15 @@ int WinsocModule::TCP_Connect(char * ip)
 			return 0;
 		}
 
+		setsockopt(this->m_TCP_SenderSocket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));	//TCP Options
+		if (iResult == SOCKET_ERROR)
+		{
+			printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
+			closesocket(this->m_TCP_SenderSocket);
+			WSACleanup();
+			return 0;
+		}
+
 		//Send CONNECTION_REQUEST package
 		const unsigned int packet_size = sizeof(Packet);
 
@@ -318,6 +327,8 @@ bool WinsocModule::AcceptNewClient()
 
 		this->m_TCP_ConenctedSocket = otherClientSocket;
 		this->m_TCP_SenderSocket = otherClientSocket;
+		setsockopt(otherClientSocket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));	//TCP Options
+
 		printf("client %d has been connected to the server\n", this->m_ClientID);
 		this->m_ClientID++;
 		this->isConnected = true;
@@ -514,17 +525,19 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 void WinsocModule::TCP_Send_Data()
 {
 	//1GB = 1073741824 bytes;
-	const unsigned int packet_size = sizeof(DataPacket);
+	char data2[1000];
+	const unsigned int packet_size = sizeof(data2);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
 
 	DataPacket packet;
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
-
+	
+	char* data = new char[1000];
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
 		packet.ID = i;
-		NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, data2, sizeof(data2));
 		printf("Sent DataPacket %d\n", i);
 	}
 
@@ -785,7 +798,7 @@ void WinsocModule::Clock_Start()
 	this->m_ping_in_progress = true;
 }
 
-int WinsocModule::Clock_Stop()
+int WinsocModule::Clock_Stop(bool ms)
 {
 	int result = 0;
 	
@@ -793,7 +806,16 @@ int WinsocModule::Clock_Stop()
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	//Calculate the delta time togheter with end and start time to nano-seconds
-	result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
+	if (ms)
+	{
+		result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();
+	}
+	else
+	{
+		result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
+
+	}
+	
 
 	//Push back the result
 	this->m_ping_times.push_back(result);

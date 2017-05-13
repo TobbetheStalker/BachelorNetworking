@@ -9,7 +9,7 @@ void RakNetModule::Clock_Start()
 	this->m_ping_in_progress = true;
 }
 
-int RakNetModule::Clock_Stop()
+int RakNetModule::Clock_Stop(bool ms)
 {
 	int result = 0;
 
@@ -17,7 +17,14 @@ int RakNetModule::Clock_Stop()
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	//Calculate the delta time togheter with end and start time to nano-seconds
-	result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
+	if (ms)
+	{
+		result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();
+	}
+	else
+	{
+		result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
+	}
 
 	//Push back the result
 	this->m_ping_times.push_back(result);

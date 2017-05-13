@@ -47,7 +47,7 @@ public:
 	
 	int	Calculate_AVG_Delay();
 	void	Clock_Start();
-	int		Clock_Stop();
+	int		Clock_Stop(bool ms = false);
 	bool	GetTransferComplete();
 	bool	GetIsConnected();
 };

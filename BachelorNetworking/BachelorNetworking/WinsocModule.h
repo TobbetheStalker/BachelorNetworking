@@ -85,7 +85,7 @@ public:
 	bool	GetIsConnected();
 	bool	GetTransferComplete();
 	void	Clock_Start();
-	int		Clock_Stop();
+	int		Clock_Stop(bool ms=false);
 };
 
 #endif;
