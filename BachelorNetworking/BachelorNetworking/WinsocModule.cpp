@@ -132,7 +132,7 @@ void WinsocModule::UDP_Update()
 	DataPacket dp;
 	
 	//try to receive some data, this is a blocking call
-	data_length = recvfrom(this->m_UDP_Socket, this->network_message, 200, MSG_PEEK, (struct sockaddr *) &si_other, &slen);
+	data_length = recvfrom(this->m_UDP_Socket, this->network_message, 200, 0, (struct sockaddr *) &si_other, &slen);
 
 	// If there was no data
 	if (data_length <= 0)
