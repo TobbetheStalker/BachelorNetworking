@@ -14,7 +14,7 @@ WinsocModule::WinsocModule()
 	this->tranferComplete = false;
 	this->dataCounter = 0;
 	this->network_data = new char[BUFFER_SIZE];
-	this->UDP_network_data = new char[500000];
+	this->UDP_network_data = new char[UDP_BUFFER_SIZE];
 	this->network_message = new char[200];
 	this->highest = -1;
 	this->lowest = 9999999;
@@ -456,7 +456,7 @@ void WinsocModule::UDP_WaitForData()
 	int slen = sizeof(si_other);
 
 	//try to receive some data, this is a blocking call
-	if ((data_length = recvfrom(this->m_UDP_Socket, this->UDP_network_data, 300000000, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
+	if ((data_length = recvfrom(this->m_UDP_Socket, this->UDP_network_data, UDP_BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
 		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
 		//exit(EXIT_FAILURE);
