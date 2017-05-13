@@ -132,7 +132,7 @@ void WinsocModule::UDP_Update()
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	//try to receive some data, this is a blocking call
-	data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
+	data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, MSG_PEEK, (struct sockaddr *) &si_other, &slen);
 
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	int result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
