@@ -14,6 +14,7 @@ WinsocModule::WinsocModule()
 	this->tranferComplete = false;
 	this->dataCounter = 0;
 	this->network_data = new char[BUFFER_SIZE];
+	this->UDP_network_data = new char[300000000];
 	this->network_message = new char[200];
 }
 
@@ -453,7 +454,7 @@ void WinsocModule::UDP_WaitForData()
 	int slen = sizeof(si_other);
 
 	//try to receive some data, this is a blocking call
-	if ((data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
+	if ((data_length = recvfrom(this->m_UDP_Socket, UDP_network_data, 300000000, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
 		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
 		//exit(EXIT_FAILURE);
@@ -561,7 +562,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	//1GB = 1073741824 bytes;
-	char data[10000];
+	char data[65000];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 1;
 
@@ -785,7 +786,7 @@ int WinsocModule::UDP_Initialize()
 	}
 
 
-	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "10000", sizeof("10000"));
+	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
