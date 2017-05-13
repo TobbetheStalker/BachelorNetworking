@@ -646,10 +646,8 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 		//Send the packet
 		this->UDP_Send(CLOCK_SYNC, ip);
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
-		while (this->m_ping_in_progress)
-		{
-			this->UDP_Update();
-		}
+
+		this->UDP_Update();
 
 	}
 
@@ -768,20 +766,6 @@ int WinsocModule::UDP_Initialize()
 	}
 
 	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "3741824", sizeof("3741824"));
-	if (iResult == SOCKET_ERROR) {
-		printf("bind failed with error: %d\n", WSAGetLastError());
-		closesocket(this->m_UDP_Socket);
-		WSACleanup();
-		return 0;
-	}
-
-	//struct timeval read_timeout;
-	//read_timeout.tv_sec = 0;
-	//read_timeout.tv_usec = 10;
-
-	int iTimeout = 0;
-	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&iTimeout, sizeof(iTimeout));
-	
 	if (iResult == SOCKET_ERROR) {
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
