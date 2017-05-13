@@ -36,6 +36,7 @@ private:
 
 	Protocol m_CurrentProtocol;
 	char* network_data;
+	char* network_message;
 	sockaddr_in m_RecvAddr;
 
 	std::chrono::time_point<std::chrono::steady_clock> m_start_time;

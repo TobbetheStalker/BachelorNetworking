@@ -14,6 +14,7 @@ WinsocModule::WinsocModule()
 	this->tranferComplete = false;
 	this->dataCounter = 0;
 	this->network_data = new char[BUFFER_SIZE];
+	this->network_message = new char[200];
 }
 
 WinsocModule::~WinsocModule()
@@ -129,14 +130,10 @@ void WinsocModule::UDP_Update()
 	int data_read = 0;
 	Packet p;
 	DataPacket dp;
-	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
-
+	
 	//try to receive some data, this is a blocking call
-	data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, MSG_PEEK, (struct sockaddr *) &si_other, &slen);
+	data_length = recvfrom(this->m_UDP_Socket, this->network_message, 200, MSG_PEEK, (struct sockaddr *) &si_other, &slen);
 
-	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
-	int result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
-	int k = 0;
 	// If there was no data
 	if (data_length <= 0)
 	{
@@ -147,7 +144,7 @@ void WinsocModule::UDP_Update()
 	while (data_read != data_length)
 	{
 		//Read the header (skip the first 4 bytes since it is virtual function information)
-		memcpy(&header, &network_data[data_read], sizeof(PacketHeader));
+		memcpy(&header, &this->network_message[data_read], sizeof(PacketHeader));
 
 		switch (header)
 		{
@@ -174,7 +171,7 @@ void WinsocModule::UDP_Update()
 			break;
 
 		case DATA:
-			memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
+			memcpy(&dp, &this->network_message[data_read], sizeof(DataPacket));
 			printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
 			printf("%d \n", (this->dataCounter + 1));
 			this->dataCounter++;
@@ -342,7 +339,7 @@ void WinsocModule::ReadMessagesFromClients()
 	DataPacket dp;
 
 	//Check if there is data
-	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_message, BUFFER_SIZE);
 	int data_read = 0;
 
 	// If there was no data
@@ -356,7 +353,7 @@ void WinsocModule::ReadMessagesFromClients()
 	{
 		//Read the header (skip the first 4 bytes since it is virtual function information)
 		//memcpy(&header, &this->network_data[data_read], sizeof(PacketHeader));
-		header = network_data[data_read];
+		header = this->network_message[data_read];
 		switch (header)
 		{
 			
