@@ -278,33 +278,48 @@ int main(int argc, char *argv[])
 					rnModule.Update();
 				}
 
-				//Take avg delay of the connection
-				avgDelayNS = rnModule.Calculate_AVG_Delay();
 
-				//Start Timer
-				rnModule.Clock_Start();
-
-				//Send data
-				rnModule.SendData();
-
-				//Recive Last ack
-				while (rnModule.GetTransferComplete() == false)
+				if (ping)
 				{
-					rnModule.Update();
+					//Take avg delay of the connection
+					avgDelayNS = rnModule.Calculate_AVG_Delay();
+					printf("Average Delay: %d ns", avgDelayNS);
 				}
+				else
+				{
+					//Start Timer
+					rnModule.Clock_Start();
 
-				//Stop timer
-				timeMS = rnModule.Clock_Stop(true);
+					//Send data
+					rnModule.SendData();
 
-				//Take time - avg delay
-				totalTimeNS = timeMS - avgDelayNS;
-				printf("Total Time: %d \n avgDelay: %d\n", totalTimeNS, avgDelayNS);
+					//Recive Last ack
+					while (rnModule.GetTransferComplete() == false)
+					{
+						rnModule.Update();
+					}
+
+					//Stop timer
+					timeMS = rnModule.Clock_Stop(true);
+
+					//Take time - avg delay
+					printf("Total Time: %d\n", timeMS);
+				}
 
 			}
 			else
 			{
-				while (true)
-					rnModule.Update();
+				if (ping)
+				{
+					while (true)
+						rnModule.Update();
+				}
+				else
+				{
+					while (true)
+						rnModule.WaitForData();
+				}
+				
 			}
 			
 			rnModule.Shutdown();

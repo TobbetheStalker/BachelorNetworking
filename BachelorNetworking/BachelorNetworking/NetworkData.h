@@ -54,9 +54,7 @@ struct RakNetPacket
 struct RakNetDataPacket
 {
 	unsigned char	typeId;
-	int				nrOfPackets;		//4 bytes
-	int				ID;					//4 bytes
-	char			data[100];		//100 bytes
+	char			data[65000];		//100 bytes
 };
 
 

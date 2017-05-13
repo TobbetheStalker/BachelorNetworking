@@ -24,7 +24,7 @@ private:
 	bool				transferComplete;
 	bool				isConnected;
 	int					dataCounter;
-
+	int					data_total;
 
 public:
 
@@ -40,6 +40,7 @@ public:
 	void Shutdown();
 
 	void Update();
+	void WaitForData();
 
 	bool Connect(char* ip);
 	void Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability);

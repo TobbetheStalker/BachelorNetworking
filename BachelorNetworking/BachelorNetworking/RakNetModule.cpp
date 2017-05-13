@@ -69,6 +69,7 @@ RakNetModule::RakNetModule()
 	this->transferComplete = false;
 	this->isConnected = false;
 	this->dataCounter = 0;
+	this->data_total = 0;
 }
 
 RakNetModule::~RakNetModule()
@@ -154,20 +155,14 @@ void RakNetModule::Update()
 			break;
 
 		case R_DATA:
-			
-			dp = (RakNetDataPacket*)RaKpacket->data;
-			this->dataCounter++;
-			if (this->dataCounter == dp->nrOfPackets)
-			{
-				this->Send(DefaultMessageIDTypes::R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
-			}
-			printf("Recived R_DATA Packet %d of %d\n", dp->ID, dp->nrOfPackets);
+
+			printf("Recived R_DATA Packet\n");
 			break;
 
 		case R_TRANSFER_COMPLETE :
 			printf("Recived R_TRANSFER_COMPLETE Packet\n");
 			this->transferComplete = true;
-
+			return;
 			break;
 
 		default:
@@ -176,6 +171,28 @@ void RakNetModule::Update()
 		}
 	}
 
+}
+
+void RakNetModule::WaitForData()
+{
+	RakNet::Packet* RaKpacket;
+
+	for (RaKpacket = peer->Receive(); RaKpacket; peer->DeallocatePacket(RaKpacket), RaKpacket = peer->Receive())
+	{
+
+		if (RaKpacket != nullptr)
+		{
+			this->data_total += sizeof(RaKpacket);
+
+			if (this->data_total >= DATA_SIZE)
+			{
+				this->Send(R_TRANSFER_COMPLETE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+				this->data_total = 0;
+			}
+		}
+
+		
+	}
 }
 
 bool RakNetModule::Connect(char * ip)
@@ -187,7 +204,6 @@ bool RakNetModule::Connect(char * ip)
 
 void RakNetModule::Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability)
 {
-
 	RakNetPacket packet;
 	packet.typeId = id;
 
@@ -198,37 +214,12 @@ void RakNetModule::SendData()
 {
 	RakNetDataPacket packet;
 	packet.typeId = R_DATA;
-
-	LARGE_INTEGER frequency, currTime, prevTime, elapsedTime;
-
-	QueryPerformanceFrequency(&frequency);
-	//QueryPerformanceCounter(&prevTime);
-	QueryPerformanceCounter(&currTime);
-
-	//1GB = 1073741824 bytes;
-	int nrOfPackets = ceil(1073741824 / (sizeof(DataPacket)));
-	const unsigned int packet_size = sizeof(DataPacket);
-	packet.nrOfPackets = nrOfPackets;
-	int counter = 0;
-	elapsedTime.QuadPart = 0;
-
-	while (counter <= nrOfPackets)
+	int nrOfPackets = ceil(DATA_SIZE / (sizeof(RakNetDataPacket)));
+	const unsigned int packet_size = sizeof(RakNetDataPacket);
+	
+	for (int i = 1; i <= nrOfPackets; i++)
 	{
-		prevTime = currTime;
-		QueryPerformanceCounter(&currTime);
-		elapsedTime.QuadPart += currTime.QuadPart - prevTime.QuadPart;
-		//elapsedTime.QuadPart /= 1000000;
-		//elapsedTime.QuadPart /= frequency.QuadPart;
-
-		//IF more than a secound has past
-		if ((float)elapsedTime.QuadPart > 0.1f)
-		{
-			packet.ID = counter;
-			peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet), IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
-			counter++;
-			elapsedTime.QuadPart = 0;
-			printf("Sent DataPacket %d\n", counter);
-		}
+		peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet), IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 	}
 
 }
