@@ -561,7 +561,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	//1GB = 1073741824 bytes;
-	char data[65507];
+	char data[10000];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 1;
 
@@ -785,7 +785,7 @@ int WinsocModule::UDP_Initialize()
 	}
 
 
-	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));
+	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "10000", sizeof("10000"));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
