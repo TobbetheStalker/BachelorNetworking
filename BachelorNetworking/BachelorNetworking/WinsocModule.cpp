@@ -446,7 +446,7 @@ void WinsocModule::TCP_WaitForData()
 
 void WinsocModule::UDP_WaitForData()
 {
-	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
+	int data_length = -1;
 	int data_read = 0;
 
 	struct sockaddr_in si_other;
@@ -535,7 +535,6 @@ void WinsocModule::TCP_Send_Data()
 	
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
-		packet.ID = i;
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
 		printf("Sent DataPacket %d\n", i);
 	}
@@ -569,7 +568,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
 		sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
-
+		printf("Sent DataPacket %d\n", i);
 	}
 
 }
