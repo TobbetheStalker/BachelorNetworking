@@ -137,6 +137,10 @@ int main(int argc, char *argv[])
 	int avgDelayNS = 0;
 	int timeMS = 0;
 	int totalTimeNS = 0;
+	int timetotal = 0;
+	int high = -1;
+	int lowest = 999999999;
+	int iterations = 100;
 
 	if (SetParam(argc, argv)) 
 	{
@@ -173,24 +177,38 @@ int main(int argc, char *argv[])
 					}
 					else //Time data
 					{
-						//Start Timer
-						wsModule.Clock_Start();
 
-						//Send data
-						wsModule.TCP_Send_Data();
-
-						//Recive Last ack
-						while (wsModule.GetTransferComplete() == false)
+						for (int i = 0; i < iterations; i++)
 						{
-							wsModule.TCP_Update();
-						}
+							//Start Timer
+							wsModule.Clock_Start();
 
-						//Stop timer
-						timeMS = wsModule.Clock_Stop(true);
-						printf("Average Delay: %d ms\n", timeMS);
-					}
-							
+							//Send data
+							wsModule.TCP_Send_Data();
+
+							//Recive Last ack
+							while (wsModule.GetTransferComplete() == false)
+							{
+								wsModule.TCP_Update();
+							}
+
+							//Stop timer
+							timeMS = wsModule.Clock_Stop(true);
+							timetotal += timeMS;
+							if (timeMS > high)
+							{
+								high = timeMS;
+							}
+
+							if (timeMS < lowest)
+							{
+								lowest = timeMS;
+							}
+						}
+						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal / iterations, high, lowest);		
 						
+					}
+					
 				}
 				else //Is set to be reciver
 				{
@@ -229,21 +247,34 @@ int main(int argc, char *argv[])
 					}
 					else //Time data
 					{
-						//Start Timer
-						wsModule.Clock_Start();
-
-						//Send data
-						wsModule.UDP_Send_Data(ip);
-
-						//Recive Last ack
-						while (wsModule.GetTransferComplete() == false)
+						for (int i = 0; i < iterations; i++)
 						{
-							wsModule.UDP_Update();
-						}
+							//Start Timer
+							wsModule.Clock_Start();
 
-						//Stop timer
-						timeMS = wsModule.Clock_Stop(true);
-						printf("Total time: %d ms\n", timeMS);
+							//Send data
+							wsModule.UDP_Send_Data(ip);
+
+							//Recive Last ack
+							while (wsModule.GetTransferComplete() == false)
+							{
+								wsModule.UDP_Update();
+							}
+
+							//Stop timer
+							timeMS = wsModule.Clock_Stop(true);
+							timetotal += timeMS;
+							if (timeMS > high)
+							{
+								high = timeMS;
+							}
+
+							if (timeMS < lowest)
+							{
+								lowest = timeMS;
+							}
+						}
+						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal/iterations, high, lowest);
 					}
 
 
