@@ -530,27 +530,22 @@ void WinsocModule::TCP_Send_Data()
 
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 {
-	sockaddr_in RecvAddr;
-	RecvAddr.sin_family = AF_INET;
-	RecvAddr.sin_port = 6881;
-	RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
+	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 	const unsigned int packet_size = sizeof(Packet);
 
 	Packet packet;
 	packet.packet_type = headertype;
 
-	sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr));
+	sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
 	
 }
 
 void WinsocModule::UDP_Send_Data(char * ip)
 {
-	sockaddr_in RecvAddr;
-	RecvAddr.sin_family = AF_INET;
-	RecvAddr.sin_port = 6881;
-	RecvAddr.sin_addr.s_addr = inet_addr(ip);
+
+	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	//1GB = 1073741824 bytes;
 	const unsigned int packet_size = sizeof(DataPacket);
@@ -563,7 +558,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
 		packet.ID = i;
-		if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR)
+		if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
 			printf("sendto() failed with error code : %d \n", WSAGetLastError());
 		}
@@ -781,6 +776,9 @@ int WinsocModule::UDP_Initialize()
 		WSACleanup();
 		return 0;
 	}
+
+	this->m_RecvAddr.sin_family = AF_INET;
+	this->m_RecvAddr.sin_port = 6881;
 
 	return 1;
 }
