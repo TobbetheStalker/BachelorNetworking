@@ -776,7 +776,7 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "1073741824", sizeof("1073741824"));
+	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "2073741824", sizeof("2073741824"));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
