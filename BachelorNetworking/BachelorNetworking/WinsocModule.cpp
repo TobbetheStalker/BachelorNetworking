@@ -525,19 +525,18 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 void WinsocModule::TCP_Send_Data()
 {
 	//1GB = 1073741824 bytes;
-	char data2[1000];
-	const unsigned int packet_size = sizeof(data2);
+	char data[100000];
+	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
 
 	DataPacket packet;
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
 	
-	char* data = new char[1000];
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
 		packet.ID = i;
-		NetworkService::sendMessage(this->m_TCP_SenderSocket, data2, sizeof(data2));
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
 		printf("Sent DataPacket %d\n", i);
 	}
 
@@ -563,17 +562,13 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	//1GB = 1073741824 bytes;
-	const unsigned int packet_size = sizeof(DataPacket);
-	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
-
-	DataPacket packet;
-	packet.packet_type = DATA;
-	packet.nrOfPackets = nrOfPackets;
+	char data[100000];
+	const unsigned int packet_size = sizeof(data);
+	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 1;
 
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
-		packet.ID = i;
-		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
+		sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
 	}
 
