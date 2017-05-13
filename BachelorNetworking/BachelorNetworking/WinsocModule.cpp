@@ -129,10 +129,14 @@ void WinsocModule::UDP_Update()
 	int data_read = 0;
 	Packet p;
 	DataPacket dp;
+	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	//try to receive some data, this is a blocking call
 	data_length = recvfrom(this->m_UDP_Socket, network_data, BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
 
+	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+	int result = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - this->m_start_time).count();
+	int k = 0;
 	// If there was no data
 	if (data_length <= 0)
 	{
@@ -160,6 +164,7 @@ void WinsocModule::UDP_Update()
 			this->Clock_Stop();
 			printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
 			data_read += sizeof(Packet);
+			return;
 			break;
 
 		case CONNECTION_REQUEST:
@@ -558,14 +563,8 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
 		packet.ID = i;
-		if (sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
-		{
-			printf("sendto() failed with error code : %d \n", WSAGetLastError());
-		}
-		else
-		{
-			printf("Sent DataPacket %d\n", i);
-		}
+		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&packet), packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
+
 	}
 
 }
@@ -643,10 +642,9 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 	{
 		//Start the clock
 		this->Clock_Start();
-
+		
 		//Send the packet
 		this->UDP_Send(CLOCK_SYNC, ip);
-
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
 		{
@@ -770,6 +768,18 @@ int WinsocModule::UDP_Initialize()
 	}
 
 	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "3741824", sizeof("3741824"));
+	if (iResult == SOCKET_ERROR) {
+		printf("bind failed with error: %d\n", WSAGetLastError());
+		closesocket(this->m_UDP_Socket);
+		WSACleanup();
+		return 0;
+	}
+
+	//struct timeval read_timeout;
+	//read_timeout.tv_sec = 0;
+	//read_timeout.tv_usec = 10;
+
+	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_DONTLINGER, "1", sizeof("1"));
 	if (iResult == SOCKET_ERROR) {
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
