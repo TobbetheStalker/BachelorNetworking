@@ -569,7 +569,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	{
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
-			printf("ERROR");
+			printf("ERROR\n");
 		}
 		printf("Sent DataPacket %d\n", i);
 	}
@@ -774,7 +774,16 @@ int WinsocModule::UDP_Initialize()
 
 	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "3741824", sizeof("3741824"));
 	if (iResult == SOCKET_ERROR) {
-		printf("bind failed with error: %d\n", WSAGetLastError());
+		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
+		closesocket(this->m_UDP_Socket);
+		WSACleanup();
+		return 0;
+	}
+
+
+	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));	//TCP Options
+	if (iResult == SOCKET_ERROR) {
+		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
 		WSACleanup();
 		return 0;
