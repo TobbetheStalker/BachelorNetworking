@@ -168,6 +168,8 @@ int main(int argc, char *argv[])
 						//Take avg delay of the connection
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
 						printf("Average Delay: %d ns", avgDelayNS);
+						printf("Highest Delay: %d ns", wsModule.GetHighest());
+						printf("Lowest Delay: %d ns", wsModule.GetLowest());
 					}
 					else //Time data
 					{
@@ -222,6 +224,8 @@ int main(int argc, char *argv[])
 						//Take avg delay of the connection
 						avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
 						printf("Average Delay: %d ns", avgDelayNS);
+						printf("Highest Delay: %d ns", wsModule.GetHighest());
+						printf("Lowest Delay: %d ns", wsModule.GetLowest());
 					}
 					else //Time data
 					{

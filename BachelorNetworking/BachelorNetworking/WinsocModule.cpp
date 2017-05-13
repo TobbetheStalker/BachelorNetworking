@@ -591,6 +591,16 @@ float WinsocModule::GetAvrgRTT()
 	{
 		result += *itr._Ptr;
 		count++;
+
+		if (*itr._Ptr > this->highest)
+		{
+			this->highest = *itr._Ptr;
+		}
+		else if (*itr._Ptr < this->lowest)
+		{
+			this->lowest = *itr._Ptr;
+		}
+
 		itr++;
 	}
 
@@ -835,6 +845,16 @@ int WinsocModule::Clock_Stop(bool ms)
 	this->m_ping_in_progress = false;
 
 	return result;
+}
+
+int WinsocModule::GetHighest()
+{
+	return this->highest;
+}
+
+int WinsocModule::GetLowest()
+{
+	return this->lowest;
 }
 
 

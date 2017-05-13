@@ -48,6 +48,8 @@ private:
 	bool				tranferComplete;
 	int					dataCounter;
 	int					data_total;
+	int					highest;
+	int					lowest;
 
 public:
 
@@ -87,6 +89,8 @@ public:
 	bool	GetTransferComplete();
 	void	Clock_Start();
 	int		Clock_Stop(bool ms=false);
+	int		GetHighest();
+	int		GetLowest();
 };
 
 #endif;

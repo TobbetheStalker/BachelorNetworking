@@ -219,7 +219,8 @@ void RakNetModule::SendData()
 	
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
-		peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet), IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+		int j = peer->Send(reinterpret_cast<char*>(&packet), sizeof(packet), HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
 		printf("Sent DataPacket %d\n", i);
 	}
 
