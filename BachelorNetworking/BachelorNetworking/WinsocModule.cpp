@@ -14,8 +14,10 @@ WinsocModule::WinsocModule()
 	this->tranferComplete = false;
 	this->dataCounter = 0;
 	this->network_data = new char[BUFFER_SIZE];
-	this->UDP_network_data = new char[300000000];
+	this->UDP_network_data = new char[500000];
 	this->network_message = new char[200];
+	this->highest = -1;
+	this->lowest = 9999999;
 }
 
 WinsocModule::~WinsocModule()
@@ -591,16 +593,6 @@ float WinsocModule::GetAvrgRTT()
 	{
 		result += *itr._Ptr;
 		count++;
-
-		if (*itr._Ptr > this->highest)
-		{
-			this->highest = *itr._Ptr;
-		}
-		else if (*itr._Ptr < this->lowest)
-		{
-			this->lowest = *itr._Ptr;
-		}
-
 		itr++;
 	}
 
@@ -837,6 +829,14 @@ int WinsocModule::Clock_Stop(bool ms)
 
 	}
 	
+	if (result > this->highest)
+	{
+		this->highest = result;
+	}
+	else if (result < this->lowest)
+	{
+		this->lowest = result;
+	}
 
 	//Push back the result
 	this->m_ping_times.push_back(result);
