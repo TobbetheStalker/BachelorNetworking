@@ -561,7 +561,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
 	//1GB = 1073741824 bytes;
-	char data[100000];
+	char data[65507];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 1;
 
@@ -569,9 +569,13 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	{
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
-			printf("ERROR\n");
+			printf("send failed\n");
 		}
-		printf("Sent DataPacket %d\n", i);
+		else 
+		{
+			printf("Sent DataPacket %d\n", i);
+		}
+		
 	}
 
 }
@@ -772,7 +776,7 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "3741824", sizeof("3741824"));
+	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "1073741824", sizeof("1073741824"));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
@@ -781,7 +785,7 @@ int WinsocModule::UDP_Initialize()
 	}
 
 
-	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));	//TCP Options
+	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
