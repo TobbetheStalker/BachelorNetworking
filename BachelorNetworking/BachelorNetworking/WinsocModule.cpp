@@ -499,6 +499,14 @@ void WinsocModule::UDP_WaitForData()
 	int id;
 	memcpy(&id,UDP_network_data,sizeof(int));
 
+	if (id == 1) //If we recive a new set of packages
+	{
+		//Reset the variables
+		this->m_currentID = 0;	
+		this->data_total = 0;
+		this->m_missedPackets = 0;
+	}
+
 	int dif = id - this->m_currentID;
 
 	if (dif > 1)
@@ -514,10 +522,8 @@ void WinsocModule::UDP_WaitForData()
 	if (data_total >= DATA_SIZE)
 	{
 		this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
-		printf("Sent TRANSFER_COMPLETE\n");
-		this->data_total = 0;
-		this->m_currentID = 0;
-		this->m_missedPackets = 0;
+		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/65000, this->m_missedPackets);
+
 	}
 }
 
