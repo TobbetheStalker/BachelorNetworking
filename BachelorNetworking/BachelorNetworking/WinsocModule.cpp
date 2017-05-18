@@ -152,11 +152,11 @@ void WinsocModule::UDP_Update()
 	// > 0: data ready to be read
 	int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
 	if (retval == -1) {
-		printf("Error");
+		printf("Error, something went wrong with the 'select' function\n");
 		return;
 	}
 	else if (retval == 0) {
-		printf("Timeout");
+		printf("Timeout, No incoming data\n");
 		return;
 	}
 	
@@ -627,6 +627,9 @@ void WinsocModule::UDP_Send_Data(char * ip)
 		this->UDP_Update();
 	}
 
+	this->tranferComplete = false;
+
+	return;
 }
 
 float WinsocModule::GetAvrgRTT()
