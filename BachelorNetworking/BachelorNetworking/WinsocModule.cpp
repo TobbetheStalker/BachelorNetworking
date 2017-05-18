@@ -136,6 +136,30 @@ void WinsocModule::UDP_Update()
 	Packet p;
 	DataPacket dp;
 	
+	// Setup timeval variable. If 0,0 it will return imedietly
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	// Setup fd_set structure
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(this->m_UDP_Socket, &fds);
+
+	// Return value:
+	// -1: error occurred
+	// 0: timed out
+	// > 0: data ready to be read
+	int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
+	if (retval == -1) {
+		printf("Error");
+		return;
+	}
+	else if (retval == 0) {
+		printf("Timeout");
+		return;
+	}
+	
 	//try to receive some data, this is a blocking call
 	data_length = recvfrom(this->m_UDP_Socket, this->network_message, 200, 0, (struct sockaddr *) &si_other, &slen);
 
