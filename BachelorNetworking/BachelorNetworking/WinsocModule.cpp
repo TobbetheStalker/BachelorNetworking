@@ -470,6 +470,9 @@ void WinsocModule::UDP_WaitForData()
 		return;
 	}
 
+	int id;
+	memcpy(&id,UDP_network_data,sizeof(int));
+
 	this->data_total += data_length;
 	printf("%d\n", this->data_total);
 
@@ -571,6 +574,7 @@ void WinsocModule::UDP_Send_Data(char * ip)
 
 	for (int i = 1; i <= nrOfPackets; i++)
 	{
+		memcpy(&data, &i, sizeof(int));
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
 			printf("send failed\n");
