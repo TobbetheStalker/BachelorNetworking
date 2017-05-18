@@ -186,12 +186,6 @@ int main(int argc, char *argv[])
 							//Send data
 							wsModule.TCP_Send_Data();
 
-							//Recive Last ack
-							while (wsModule.GetTransferComplete() == false)
-							{
-								wsModule.TCP_Update();
-							}
-
 							//Stop timer
 							timeMS = wsModule.Clock_Stop(true);
 							timetotal += timeMS;

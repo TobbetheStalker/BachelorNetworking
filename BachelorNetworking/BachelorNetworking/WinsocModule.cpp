@@ -591,6 +591,15 @@ void WinsocModule::TCP_Send_Data()
 		printf("Sent DataPacket %d\n", i);
 	}
 
+	//Recive Last ack
+	while (this->tranferComplete == false)
+	{
+		this->TCP_Update();
+	}
+
+	this->tranferComplete = false;
+
+	return;
 }
 
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
@@ -615,7 +624,6 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	//1GB = 1073741824 bytes;
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
-	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 10;
 	int id = 0;
 
 	while(this->tranferComplete != true)
