@@ -282,7 +282,8 @@ int WinsocModule::TCP_Connect(char * ip)
 			return 0;
 		}
 
-		setsockopt(this->m_TCP_SenderSocket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));	//TCP Options
+		int value = 1024000 * 300;	//Mb * 300
+		setsockopt(this->m_TCP_SenderSocket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int) );	//TCP Options
 		if (iResult == SOCKET_ERROR)
 		{
 			printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
@@ -779,7 +780,8 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, "2073741824", sizeof("2073741824"));
+	int value = 1024000 * 300;	//Mb * 300
+	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);
@@ -787,8 +789,8 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-
-	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, "1073741824", sizeof("1073741824"));
+	value = 1024000 * 300;	// Set the value again if we want to change it
+	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
 		closesocket(this->m_UDP_Socket);

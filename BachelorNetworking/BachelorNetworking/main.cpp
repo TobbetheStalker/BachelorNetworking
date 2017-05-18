@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	int timetotal = 0;
 	int high = -1;
 	int lowest = 999999999;
-	int iterations = 100;
+	int iterations = 5;
 
 	if (SetParam(argc, argv)) 
 	{
