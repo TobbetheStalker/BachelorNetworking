@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 				}
 
 			}
-			else 
+			else //UDP
 			{
 				if (isSender)	//Is set to be the sender
 				{
@@ -256,10 +256,10 @@ int main(int argc, char *argv[])
 							wsModule.UDP_Send_Data(ip);
 
 							//Recive Last ack
-							while (wsModule.GetTransferComplete() == false)
-							{
-								wsModule.UDP_Update();
-							}
+							//while (wsModule.GetTransferComplete() == false)
+							//{
+							//	wsModule.UDP_Update();
+							//}
 
 							//Stop timer
 							timeMS = wsModule.Clock_Stop(true);

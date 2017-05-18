@@ -13,6 +13,8 @@ WinsocModule::WinsocModule()
 	this->isConnected = false;
 	this->tranferComplete = false;
 	this->dataCounter = 0;
+	this->m_currentID = 0;
+	this->m_missedPackets = 0;
 	this->network_data = new char[BUFFER_SIZE];
 	this->UDP_network_data = new char[UDP_BUFFER_SIZE];
 	this->network_message = new char[200];
@@ -473,6 +475,15 @@ void WinsocModule::UDP_WaitForData()
 	int id;
 	memcpy(&id,UDP_network_data,sizeof(int));
 
+	int dif = id - this->m_currentID;
+
+	if (dif > 1)
+	{
+		this->m_missedPackets += dif-1;
+	}
+
+	this->m_currentID = id;
+
 	this->data_total += data_length;
 	printf("%d\n", this->data_total);
 
@@ -480,7 +491,9 @@ void WinsocModule::UDP_WaitForData()
 	{
 		this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
 		printf("Sent TRANSFER_COMPLETE\n");
-		data_total = 0;
+		this->data_total = 0;
+		this->m_currentID = 0;
+		this->m_missedPackets = 0;
 	}
 }
 
@@ -571,19 +584,23 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size) + 10;
+	int id = 0;
 
-	for (int i = 1; i <= nrOfPackets; i++)
+	while(this->tranferComplete != true)
 	{
-		memcpy(&data, &i, sizeof(int));
+		id++;
+		memcpy(&data, &id, sizeof(int));
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
 			printf("send failed\n");
 		}
 		else 
 		{
-			printf("Sent DataPacket %d\n", i);
+			printf("Sent DataPacket %d\n", id);
 		}
-		
+
+		//Se if we recived a response
+		this->UDP_Update();
 	}
 
 }

@@ -47,6 +47,8 @@ private:
 	bool				isConnected;
 	bool				tranferComplete;
 	int					dataCounter;
+	int					m_currentID;
+	int					m_missedPackets;
 	int					data_total;
 	int					highest;
 	int					lowest;
