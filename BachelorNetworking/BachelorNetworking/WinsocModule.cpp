@@ -519,7 +519,7 @@ void WinsocModule::UDP_WaitForData()
 	this->data_total += data_length;
 	printf("%d\n", this->data_total);
 
-	if (data_total >= DATA_SIZE)
+	if (data_total == DATA_SIZE)
 	{
 		this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
 		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/65000, this->m_missedPackets);
