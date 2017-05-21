@@ -15,7 +15,7 @@ class RakNetModule {
 
 private:
 	RakNet::RakPeerInterface* peer;
-	RakNet::SocketDescriptor listner;
+	RakNet::SocketDescriptor socketDescriptor;
 
 	std::chrono::time_point<std::chrono::steady_clock> m_start_time;
 	std::vector<int>	m_ping_times;

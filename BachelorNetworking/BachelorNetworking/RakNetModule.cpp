@@ -79,9 +79,10 @@ RakNetModule::~RakNetModule()
 bool RakNetModule::Initialize()
 {
 	this->peer = RakNet::RakPeerInterface::GetInstance();
-	this->listner = RakNet::SocketDescriptor(6881, 0);
+	this->socketDescriptor = RakNet::SocketDescriptor(6881, 0);
+	socketDescriptor.socketFamily = AF_INET;
 	
-	this->peer->Startup(3, &this->listner, 1);
+	this->peer->Startup(3, &this->socketDescriptor, 1);
 	this->peer->SetMaximumIncomingConnections(3);
 	
 	return 1;
