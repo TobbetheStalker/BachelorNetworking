@@ -2,6 +2,7 @@
 #include "WinsocModule.h"
 #include "RakNetModule.h"
 #include <process.h>
+#include <iostream> 
 
 //Raknet
 #include "MessageIdentifiers.h"
@@ -628,7 +629,7 @@ printf("Difficulty: Beginner\n\n");
 
 printf("Enter 's' to run as server, 'c' to run as client, space to run local.\n");
 ch = ' ';
-//Gets(text, BIG_PACKET_SIZE);
+std::cin.getline(text, BIG_PACKET_SIZE);
 ch = text[0];
 
 if (ch == 'c')
@@ -636,7 +637,7 @@ if (ch == 'c')
 	client = RakNet::RakPeerInterface::GetInstance();
 	printf("Working as client\n");
 	printf("Enter remote IP: ");
-	//Gets(text, BIG_PACKET_SIZE);
+	std::cin.getline(text, BIG_PACKET_SIZE);
 	if (text[0] == 0)
 		strcpy(text, "natpunch.jenkinssoftware.com"); // dx in Europe
 }
@@ -893,7 +894,7 @@ if (server)
 }
 
 printf("%i bytes per second (%.2f seconds). Press enter to quit\n", (int)((double)(BIG_PACKET_SIZE) / seconds), seconds);
-//Gets(text, BIG_PACKET_SIZE);
+std::cin.getline(text, BIG_PACKET_SIZE);
 
 delete[]text;
 RakNet::RakPeerInterface::DestroyInstance(client);
