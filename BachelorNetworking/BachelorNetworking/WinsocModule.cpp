@@ -856,23 +856,23 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-	int value = OS_BUFFERS;
-	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
-	if (iResult == SOCKET_ERROR) {
-		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
-		closesocket(this->m_UDP_Socket);
-		WSACleanup();
-		return 0;
-	}
+	//int value = OS_BUFFERS;
+	//iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
+	//if (iResult == SOCKET_ERROR) {
+	//	printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
+	//	closesocket(this->m_UDP_Socket);
+	//	WSACleanup();
+	//	return 0;
+	//}
 
-	value = OS_BUFFERS;	// Set the value again if we want to change it
-	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));
-	if (iResult == SOCKET_ERROR) {
-		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
-		closesocket(this->m_UDP_Socket);
-		WSACleanup();
-		return 0;
-	}
+	//value = OS_BUFFERS;	// Set the value again if we want to change it
+	//setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));
+	//if (iResult == SOCKET_ERROR) {
+	//	printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
+	//	closesocket(this->m_UDP_Socket);
+	//	WSACleanup();
+	//	return 0;
+	//}
 
 	this->m_RecvAddr.sin_family = AF_INET;
 	this->m_RecvAddr.sin_port = 6881;
