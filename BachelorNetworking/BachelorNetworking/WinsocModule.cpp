@@ -616,7 +616,7 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	
 }
 
-void WinsocModule::UDP_Send_Data(char * ip)
+int WinsocModule::UDP_Send_Data(char * ip)
 {
 
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
@@ -625,9 +625,14 @@ void WinsocModule::UDP_Send_Data(char * ip)
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
 	int id = 0;
+	int j = 0;
+	//this->Clock_Start();
+	
+	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	while(this->tranferComplete != true)
 	{
+		
 		id++;
 		memcpy(&data, &id, sizeof(int));
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
@@ -641,11 +646,18 @@ void WinsocModule::UDP_Send_Data(char * ip)
 
 		//Se if we recived a response
 		this->UDP_Update();
+	
 	}
+	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+	//j += std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();
 
+	int result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();;
+	
+	/*printf("Total Time Spent in Update: %d ms", j);
+	system("pause");*/
 	this->tranferComplete = false;
 
-	return;
+	return result;
 }
 
 float WinsocModule::GetAvrgRTT()
@@ -844,7 +856,7 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-	int value = BUFFER_SIZE;
+	int value = OS_BUFFERS;
 	iResult = setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
@@ -853,7 +865,7 @@ int WinsocModule::UDP_Initialize()
 		return 0;
 	}
 
-	value = BUFFER_SIZE;	// Set the value again if we want to change it
+	value = OS_BUFFERS;	// Set the value again if we want to change it
 	setsockopt(this->m_UDP_Socket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));
 	if (iResult == SOCKET_ERROR) {
 		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
