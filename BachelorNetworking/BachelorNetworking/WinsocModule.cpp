@@ -156,7 +156,7 @@ void WinsocModule::UDP_Update()
 		return;
 	}
 	else if (retval == 0) {
-		printf("Timeout, No incoming data\n");
+		//printf("Timeout, No incoming data\n");
 		return;
 	}
 	
@@ -517,7 +517,7 @@ void WinsocModule::UDP_WaitForData()
 	this->m_currentID = id;
 
 	this->data_total += data_length;
-	printf("%d, Loss: %d\n", this->data_total, this->m_missedPackets);
+	//printf("%d, Loss: %d\n", this->data_total, this->m_missedPackets);
 
 	if (data_total >= DATA_SIZE)
 	{
@@ -631,28 +631,10 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
 	int addS = sizeof(this->m_RecvAddr);
 
-	// Setup timeval variable. If 0,0 it will return imedietly
-	timeval timeout;
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
-
-	// Setup fd_set structure
-	fd_set fds;
-	FD_ZERO(&fds);
-	FD_SET(this->m_UDP_Socket, &fds);
-
-	struct sockaddr_in si_other;
-	int slen = sizeof(si_other);
-	int	data_length;
-	unsigned int header = -1;
-	int data_read = 0;
-
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	
-
 	while(this->tranferComplete != true)
-	{
-		
+	{	
 		id++;
 		memcpy(&data, &id, sizeof(int));
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
@@ -661,48 +643,11 @@ int WinsocModule::UDP_Send_Data(char * ip)
 		}
 		else 
 		{
-			printf("Sent DataPacket %d\n", id);
+			//printf("Sent DataPacket %d\n", id);
 		}
 
 		//Se if we recived a response
-		//this->UDP_Update();
-	
-		//See if we have recived an answer
-		int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
-		if (retval == -1) {
-			printf("Error, something went wrong with the 'select' function\n");
-			break;
-		}
-		else if (retval == 0) {
-			printf("Timeout, No incoming data\n");
-			break;
-		}
-
-		//try to receive some data, this is a blocking call
-		data_length = recvfrom(this->m_UDP_Socket, this->network_message, MESSAGE_BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
-
-		while (data_read != data_length)
-		{
-			//Read the header (skip the first 4 bytes since it is virtual function information)
-			header = this->network_message[data_read];
-			switch (header)
-			{
-
-			case TRANSFER_COMPLETE:
-				printf("Recived TRANSFER_COMPLETE Packet \n");
-				data_read += sizeof(Packet);
-				this->tranferComplete = true;
-				this->dataCounter = 0;
-				break;
-
-			default:
-				printf("Unkown packet type %d\n", header);
-				data_read = data_length;
-				break;
-			}
-
-		}
-
+		this->UDP_Update();
 
 	}
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
