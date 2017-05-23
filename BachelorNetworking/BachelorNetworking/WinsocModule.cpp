@@ -318,7 +318,7 @@ int WinsocModule::TCP_Connect(char * ip)
 			return 0;
 		}
 
-		int value = OS_BUFFERS_SIZE;
+		value = OS_BUFFERS_SIZE;
 		iResult = setsockopt(this->m_TCP_SenderSocket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
 		if (iResult == SOCKET_ERROR) {
 			printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
@@ -597,9 +597,12 @@ void WinsocModule::TCP_Send_Data()
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
 	
+	
+
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
+		
 		printf("Sent DataPacket %d\n", i);
 	}
 
