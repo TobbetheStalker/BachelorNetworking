@@ -15,9 +15,9 @@ WinsocModule::WinsocModule()
 	this->dataCounter = 0;
 	this->m_currentID = 0;
 	this->m_missedPackets = 0;
-	this->network_data = new char[BUFFER_SIZE];
+	this->network_data = new char[TCP_BUFFER_SIZE];
 	this->UDP_network_data = new char[UDP_BUFFER_SIZE];
-	this->network_message = new char[200];
+	this->network_message = new char[MESSAGE_BUFFER_SIZE];
 	this->highest = -1;
 	this->lowest = 9999999;
 }
@@ -161,7 +161,7 @@ void WinsocModule::UDP_Update()
 	}
 	
 	//try to receive some data, this is a blocking call
-	data_length = recvfrom(this->m_UDP_Socket, this->network_message, 200, 0, (struct sockaddr *) &si_other, &slen);
+	data_length = recvfrom(this->m_UDP_Socket, this->network_message, MESSAGE_BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
 
 	// If there was no data
 	if (data_length <= 0)
@@ -308,7 +308,7 @@ int WinsocModule::TCP_Connect(char * ip)
 			return 0;
 		}
 
-		int value = BUFFER_SIZE;
+		int value = OS_BUFFERS_SIZE;
 		setsockopt(this->m_TCP_SenderSocket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int) );	//TCP Options
 		if (iResult == SOCKET_ERROR)
 		{
@@ -357,7 +357,7 @@ bool WinsocModule::AcceptNewClient()
 
 		this->m_TCP_ConenctedSocket = otherClientSocket;
 		this->m_TCP_SenderSocket = otherClientSocket;
-		setsockopt(otherClientSocket, SOL_SOCKET, SO_SNDBUF, (char*)BUFFER_SIZE, sizeof(int));	//TCP Options
+		setsockopt(otherClientSocket, SOL_SOCKET, SO_SNDBUF, (char*)OS_BUFFERS_SIZE, sizeof(int));	//TCP Options
 
 		printf("client %d has been connected to the server\n", this->m_ClientID);
 		this->m_ClientID++;
@@ -380,7 +380,7 @@ void WinsocModule::ReadMessagesFromClients()
 	DataPacket dp;
 
 	//Check if there is data
-	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_message, BUFFER_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_message, MESSAGE_BUFFER_SIZE);
 	int data_read = 0;
 
 	// If there was no data
@@ -453,7 +453,7 @@ void WinsocModule::ReadMessagesFromClients()
 
 void WinsocModule::TCP_WaitForData()
 {
-	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, BUFFER_SIZE);
+	int data_length = NetworkService::receiveMessage(this->m_TCP_SenderSocket, this->network_data, TCP_BUFFER_SIZE);
 	int data_read = 0;
 
 	// If there was no data
@@ -630,6 +630,23 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	int nrofpackets = 1073741824 / 65000;
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
 	int addS = sizeof(this->m_RecvAddr);
+
+	// Setup timeval variable. If 0,0 it will return imedietly
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	// Setup fd_set structure
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(this->m_UDP_Socket, &fds);
+
+	struct sockaddr_in si_other;
+	int slen = sizeof(si_other);
+	int	data_length;
+	unsigned int header = -1;
+	int data_read = 0;
+
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	
 
@@ -648,8 +665,45 @@ int WinsocModule::UDP_Send_Data(char * ip)
 		}
 
 		//Se if we recived a response
-		this->UDP_Update();
+		//this->UDP_Update();
 	
+		//See if we have recived an answer
+		int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
+		if (retval == -1) {
+			printf("Error, something went wrong with the 'select' function\n");
+			break;
+		}
+		else if (retval == 0) {
+			printf("Timeout, No incoming data\n");
+			break;
+		}
+
+		//try to receive some data, this is a blocking call
+		data_length = recvfrom(this->m_UDP_Socket, this->network_message, MESSAGE_BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
+
+		while (data_read != data_length)
+		{
+			//Read the header (skip the first 4 bytes since it is virtual function information)
+			header = this->network_message[data_read];
+			switch (header)
+			{
+
+			case TRANSFER_COMPLETE:
+				printf("Recived TRANSFER_COMPLETE Packet \n");
+				data_read += sizeof(Packet);
+				this->tranferComplete = true;
+				this->dataCounter = 0;
+				break;
+
+			default:
+				printf("Unkown packet type %d\n", header);
+				data_read = data_length;
+				break;
+			}
+
+		}
+
+
 	}
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
@@ -909,6 +963,7 @@ int WinsocModule::Clock_Stop(bool ms)
 
 	}
 	
+
 	if (result > this->highest)
 	{
 		this->highest = result;

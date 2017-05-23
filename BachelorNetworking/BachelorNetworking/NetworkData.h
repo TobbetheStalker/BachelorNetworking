@@ -6,8 +6,9 @@
 #define GIGABYTE = 1073741824;
 const int DATA_SIZE = 1073741824;
 const int UDP_BUFFER_SIZE = 100000;
-const int BUFFER_SIZE = 1024000 * 300;	//Mb * 300
-const int OS_BUFFERS = 1024000 * 300;
+const int TCP_BUFFER_SIZE = 1024000 * 300;	//Mb * 300
+const int OS_BUFFERS_SIZE = 1024000 * 300;
+const int MESSAGE_BUFFER_SIZE = 200;
 
 #include <string>
 #include <chrono>
