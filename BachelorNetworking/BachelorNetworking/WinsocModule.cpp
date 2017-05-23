@@ -588,7 +588,7 @@ void WinsocModule::TCP_Send_Data()
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
-		printf("Sent DataPacket %d\n", i);
+		//printf("Sent DataPacket %d\n", i);
 	}
 
 	//Recive Last ack
@@ -625,9 +625,6 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
 	int id = 0;
-	int j = 0;
-	//this->Clock_Start();
-	int nrofpackets = 1073741824 / 65000;
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
 	int addS = sizeof(this->m_RecvAddr);
 
@@ -653,9 +650,7 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	int result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();;
-	
-	/*printf("Total Time Spent in Update: %d ms", j);
-	system("pause");*/
+
 	this->tranferComplete = false;
 
 	return result;
