@@ -318,6 +318,15 @@ int WinsocModule::TCP_Connect(char * ip)
 			return 0;
 		}
 
+		int value = OS_BUFFERS_SIZE;
+		iResult = setsockopt(this->m_TCP_SenderSocket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
+		if (iResult == SOCKET_ERROR) {
+			printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
+			closesocket(this->m_UDP_Socket);
+			WSACleanup();
+			return 0;
+		}
+
 		//Send CONNECTION_REQUEST package
 		const unsigned int packet_size = sizeof(Packet);
 
@@ -354,10 +363,13 @@ bool WinsocModule::AcceptNewClient()
 			char value = 1;
 			setsockopt(otherClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));	//TCP Options
 		}
+		int value = OS_BUFFERS_SIZE;
+
+		setsockopt(otherClientSocket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));	//TCP Options
+		setsockopt(otherClientSocket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
 
 		this->m_TCP_ConenctedSocket = otherClientSocket;
 		this->m_TCP_SenderSocket = otherClientSocket;
-		setsockopt(otherClientSocket, SOL_SOCKET, SO_SNDBUF, (char*)OS_BUFFERS_SIZE, sizeof(int));	//TCP Options
 
 		printf("client %d has been connected to the server\n", this->m_ClientID);
 		this->m_ClientID++;
@@ -811,26 +823,6 @@ int WinsocModule::TCP_Initialize(bool noDelay)
 
 	// No longer need address information
 	freeaddrinfo(result);
-
-
-	int value = OS_BUFFERS_SIZE;
-	iResult = setsockopt(this->m_TCP_ListnerSocket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
-	if (iResult == SOCKET_ERROR) {
-		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
-		closesocket(this->m_TCP_ListnerSocket);
-		WSACleanup();
-		return 0;
-	}
-
-	value = OS_BUFFERS_SIZE;	// Set the value again if we want to change it
-	setsockopt(this->m_TCP_ListnerSocket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));
-	if (iResult == SOCKET_ERROR) {
-		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
-		closesocket(this->m_UDP_Socket);
-		WSACleanup();
-		return 0;
-	}
-
 
 	// Start listening for new clients attempting to connect
 	iResult = listen(this->m_TCP_ListnerSocket, SOMAXCONN);
