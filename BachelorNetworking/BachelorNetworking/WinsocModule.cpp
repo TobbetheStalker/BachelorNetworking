@@ -588,7 +588,7 @@ void WinsocModule::TCP_Send_Data()
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
-		//printf("Sent DataPacket %d\n", i);
+		printf("Sent DataPacket %d\n", i);
 	}
 
 	//Recive Last ack
@@ -811,6 +811,25 @@ int WinsocModule::TCP_Initialize(bool noDelay)
 
 	// No longer need address information
 	freeaddrinfo(result);
+
+
+	int value = OS_BUFFERS_SIZE;
+	iResult = setsockopt(this->m_TCP_ListnerSocket, SOL_SOCKET, SO_RCVBUF, (char*)value, sizeof(int));
+	if (iResult == SOCKET_ERROR) {
+		printf("incressing reciver buffer failed with error: %d\n", WSAGetLastError());
+		closesocket(this->m_TCP_ListnerSocket);
+		WSACleanup();
+		return 0;
+	}
+
+	value = OS_BUFFERS_SIZE;	// Set the value again if we want to change it
+	setsockopt(this->m_TCP_ListnerSocket, SOL_SOCKET, SO_SNDBUF, (char*)value, sizeof(int));
+	if (iResult == SOCKET_ERROR) {
+		printf("incressing sender buffer failed with error: %d\n", WSAGetLastError());
+		closesocket(this->m_UDP_Socket);
+		WSACleanup();
+		return 0;
+	}
 
 
 	// Start listening for new clients attempting to connect
