@@ -212,7 +212,9 @@ void WinsocModule::UDP_Update()
 
 		case TRANSFER_COMPLETE:
 			//printf("Recived TRANSFER_COMPLETE Packet \n");
-			data_read += sizeof(Packet);
+			memcpy(&this->m_missedPackets, &this->network_message[data_read+4], sizeof(int));;
+			data_read += 8;
+			printf("Missed: %d\n",this->m_missedPackets);
 			this->tranferComplete = true;
 			this->dataCounter = 0;
 			break;
@@ -530,7 +532,17 @@ void WinsocModule::UDP_WaitForData()
 
 	if (data_total >= DATA_SIZE)
 	{
-		this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
+		//this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
+		
+		this->m_RecvAddr.sin_addr.s_addr = inet_addr(inet_ntoa(si_other.sin_addr));
+		const unsigned int packet_size = sizeof(Packet);
+
+		char data[8];
+		data[0] = TRANSFER_COMPLETE;
+		data[4] = this->m_missedPackets;
+
+		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
+
 		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/65000, this->m_missedPackets);
 		this->m_currentID = 0;
 		this->data_total = 0;
