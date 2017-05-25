@@ -118,9 +118,6 @@ void WinsocModule::Update()
 
 void WinsocModule::TCP_Update()
 {
-
-	//printf("UPDATE_TCP");
-
 	this->AcceptNewClient();				// Get any new clients
 	this->ReadMessagesFromClients();		//Read messages
 }
@@ -181,14 +178,14 @@ void WinsocModule::UDP_Update()
 		case CLOCK_SYNC:
 			//Resend a PING_RESPONSE
 			this->UDP_Send(CLOCK_SYNC_RESPONSE, inet_ntoa(si_other.sin_addr));
-			printf("Recived CLOCK_SYNC Packet \n");
+			//printf("Recived CLOCK_SYNC Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
 		case CLOCK_SYNC_RESPONSE:
 
 			this->Clock_Stop();
-			printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
+			//printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
 			data_read += sizeof(Packet);
 			return;
 			break;
@@ -196,13 +193,13 @@ void WinsocModule::UDP_Update()
 		case CONNECTION_REQUEST:
 			data_read += sizeof(Packet);
 
-			printf("Recived CONNECTION_REQUEST Packet \n");
+			//printf("Recived CONNECTION_REQUEST Packet \n");
 			break;
 
 		case DATA:
 			memcpy(&dp, &this->network_message[data_read], sizeof(DataPacket));
-			printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
-			printf("%d \n", (this->dataCounter + 1));
+			//printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
+			//printf("%d \n", (this->dataCounter + 1));
 			this->dataCounter++;
 			if (this->dataCounter == dp.nrOfPackets)
 			{
@@ -214,8 +211,8 @@ void WinsocModule::UDP_Update()
 			break;
 
 		case TRANSFER_COMPLETE:
-			printf("Recived TRANSFER_COMPLETE Packet \n");
-			data_read += sizeof(Packet);
+			//printf("Recived TRANSFER_COMPLETE Packet \n");
+			//data_read += sizeof(Packet);
 			this->tranferComplete = true;
 			this->dataCounter = 0;
 			break;
@@ -413,28 +410,28 @@ void WinsocModule::ReadMessagesFromClients()
 		case CLOCK_SYNC :
 			//Resend a PING_RESPONSE
 			this->TCP_Send(CLOCK_SYNC_RESPONSE);
-			printf("Recived CLOCK_SYNC Packet \n");
+			//printf("Recived CLOCK_SYNC Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
 		case CLOCK_SYNC_RESPONSE:
 			
 			this->Clock_Stop();
-			printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
+			//printf("Recived CLOCK_SYNC_RESPONSE Packet \n");
 			data_read += sizeof(Packet);
 			break;
 
 		case CONNECTION_REQUEST :
 			data_read += sizeof(Packet);
 
-			printf("Recived CONNECTION_REQUEST Packet \n");
+			//printf("Recived CONNECTION_REQUEST Packet \n");
 			break;
 
 		case DATA:
 			old = data_read;
 			memcpy(&dp, &network_data[data_read], sizeof(DataPacket));
-			printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
-			printf("%d \n",(this->dataCounter + 1) );
+			//printf("Recived DATA Packet %d of %d, Expected ", dp.ID, dp.nrOfPackets);
+			//printf("%d \n",(this->dataCounter + 1) );
 			this->dataCounter++;
 			if (this->dataCounter == dp.nrOfPackets)
 			{
@@ -446,7 +443,7 @@ void WinsocModule::ReadMessagesFromClients()
 			break;
 
 		case TRANSFER_COMPLETE :
-			printf("Recived TRANSFER_COMPLETE Packet \n");
+			//printf("Recived TRANSFER_COMPLETE Packet \n");
 			data_read += sizeof(Packet);
 			this->tranferComplete = true;
 			this->dataCounter = 0;
@@ -586,7 +583,7 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 	NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
 }
 
-void WinsocModule::TCP_Send_Data()
+int WinsocModule::TCP_Send_Data()
 {
 	//1GB = 1073741824 bytes;
 	char data[100000];
@@ -597,7 +594,7 @@ void WinsocModule::TCP_Send_Data()
 	packet.packet_type = DATA;
 	packet.nrOfPackets = nrOfPackets;
 	
-	
+	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
@@ -612,9 +609,13 @@ void WinsocModule::TCP_Send_Data()
 		this->TCP_Update();
 	}
 
+	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+
+	int result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();;
+
 	this->tranferComplete = false;
 
-	return;
+	return result;
 }
 
 void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
@@ -715,7 +716,7 @@ int WinsocModule::Calculate_AVG_Delay()
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
 		{
-			this->Update();
+			this->TCP_Update();
 		}
 
 	}
@@ -747,13 +748,16 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 		
 		//Send the packet
 		this->UDP_Send(CLOCK_SYNC, ip);
-		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 
-		this->UDP_Update();
+		while (this->m_ping_in_progress)
+		{
+			this->UDP_Update();
+		}
 
 	}
 
 	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
+	
 	return this->m_Avg_Delay;
 }
 

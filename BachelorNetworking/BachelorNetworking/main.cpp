@@ -180,23 +180,18 @@ int main(int argc, char *argv[])
 					{
 						//Take avg delay of the connection
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
-						printf("Average Delay: %d ns ", avgDelayNS);
-						printf("Highest Delay: %d ns ", wsModule.GetHighest());
-						printf("Lowest Delay: %d ns", wsModule.GetLowest());
+						printf("Average Delay: %d ns, ", avgDelayNS);
+						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
+						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
 					}
 					else //Time data
 					{
 
 						for (int i = 0; i < iterations; i++)
 						{
-							//Start Timer
-							wsModule.Clock_Start();
-
 							//Send data
-							wsModule.TCP_Send_Data();
+							timeMS = wsModule.TCP_Send_Data();
 
-							//Stop timer
-							timeMS = wsModule.Clock_Stop(true);
 							timetotal += timeMS;
 							if (timeMS > high)
 							{
@@ -239,33 +234,21 @@ int main(int argc, char *argv[])
 			{
 				if (isSender)	//Is set to be the sender
 				{
-
 					if (ping == true)	//Calculate delay
 					{
 						//Take avg delay of the connection
 						avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
-						printf("Average Delay: %d ns", avgDelayNS);
-						printf("Highest Delay: %d ns", wsModule.GetHighest());
-						printf("Lowest Delay: %d ns", wsModule.GetLowest());
+						printf("Average Delay: %d ns, ", avgDelayNS);
+						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
+						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
 					}
 					else //Time data
 					{
 						for (int i = 0; i < iterations; i++)
 						{
-							//Start Timer
-							//wsModule.Clock_Start();
-
 							//Send data
 							timeMS = wsModule.UDP_Send_Data(ip);
 
-							//Recive Last ack
-							//while (wsModule.GetTransferComplete() == false)
-							//{
-							//	wsModule.UDP_Update();
-							//}
-
-							//Stop timer
-							//timeMS = wsModule.Clock_Stop(true);
 							timetotal += timeMS;
 							if (timeMS > high)
 							{
