@@ -42,6 +42,7 @@ private:
 
 	std::chrono::time_point<std::chrono::steady_clock> m_start_time;
 	std::vector<int>	m_ping_times;
+	std::vector<int>	m_packet_loss;
 	bool				m_ping_in_progress;
 	int					m_Avg_Delay;
 	bool				isConnected;
@@ -52,6 +53,9 @@ private:
 	int					data_total;
 	int					highest;
 	int					lowest;
+	int					averageLoss;
+	int					highestLoss;
+	int					lowestLoss;
 
 	timeval timeout;
 	fd_set fds;
@@ -90,12 +94,16 @@ public:
 
 	int		Calculate_AVG_Delay();	//TCP
 	int		Calculate_AVG_Delay(char* ip);	//UDP
+	void		Calcualet_Loss();
 	bool	GetIsConnected();
 	bool	GetTransferComplete();
 	void	Clock_Start();
 	int		Clock_Stop(bool ms=false);
 	int		GetHighest();
 	int		GetLowest();
+	int		GetAverageLoss();
+	int		GetHighestLoss();
+	int		GetLowestLoss();
 };
 
 #endif;

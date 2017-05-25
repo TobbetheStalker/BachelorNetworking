@@ -270,6 +270,9 @@ int main(int argc, char *argv[])
 						printf("Average Delay: %d ns, ", avgDelayNS);
 						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
 						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
+						printf("Average Loss: %d ns, ", wsModule.GetAverageLoss());
+						printf("Highest Loss: %d ns, ", wsModule.GetHighestLoss());
+						printf("Lowest Loss: %d ns\n", wsModule.GetLowestLoss());
 					
 						std::string filename = "";
 						for (int i = 1; i < argc; i++)

@@ -214,7 +214,7 @@ void WinsocModule::UDP_Update()
 			//printf("Recived TRANSFER_COMPLETE Packet \n");
 			memcpy(&this->m_missedPackets, &this->network_message[data_read+4], sizeof(int));;
 			data_read += 8;
-			printf("Missed: %d\n",this->m_missedPackets);
+			this->m_packet_loss.push_back(this->m_missedPackets);
 			this->tranferComplete = true;
 			this->dataCounter = 0;
 			break;
@@ -655,6 +655,7 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	int id = 0;
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
 	int addS = sizeof(this->m_RecvAddr);
+	this->m_packet_loss.clear();	//Clear the packet loss vector
 
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	
@@ -771,6 +772,35 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
 	
 	return this->m_Avg_Delay;
+}
+
+void WinsocModule::Calcualet_Loss()
+{
+	float result = 0;
+	int count = 0;
+	std::vector<int>::iterator itr;
+	this->highestLoss = -1;
+	this->lowestLoss = 9999999;
+
+	for (itr = this->m_packet_loss.begin(); itr != this->m_packet_loss.end();)
+	{
+		int value = *itr._Ptr;
+		if (value > this->highestLoss)
+		{
+			highestLoss = value;
+		}
+		else if (value < lowestLoss)
+		{
+			lowestLoss = value;
+		}
+
+		result += value;
+		count++;
+		itr++;
+	}
+
+	this->averageLoss = result / count;
+
 }
 
 bool WinsocModule::GetIsConnected()
@@ -960,6 +990,21 @@ int WinsocModule::GetHighest()
 int WinsocModule::GetLowest()
 {
 	return this->lowest;
+}
+
+int WinsocModule::GetAverageLoss()
+{
+	return this->averageLoss;
+}
+
+int WinsocModule::GetHighestLoss()
+{
+	return this->highestLoss;
+}
+
+int WinsocModule::GetLowestLoss()
+{
+	return this->lowestLoss;
 }
 
 
