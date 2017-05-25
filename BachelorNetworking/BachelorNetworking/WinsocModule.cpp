@@ -212,7 +212,7 @@ void WinsocModule::UDP_Update()
 
 		case TRANSFER_COMPLETE:
 			//printf("Recived TRANSFER_COMPLETE Packet \n");
-			//data_read += sizeof(Packet);
+			data_read += sizeof(Packet);
 			this->tranferComplete = true;
 			this->dataCounter = 0;
 			break;
