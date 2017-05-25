@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "WinsocModule.h"
 #include "RakNetModule.h"
 #include <process.h>
@@ -150,6 +151,7 @@ int main(int argc, char *argv[])
 	int high = -1;
 	int lowest = 999999999;
 	int iterations = 5;
+	std::ofstream file;
 
 	if (SetParam(argc, argv)) 
 	{
@@ -178,11 +180,25 @@ int main(int argc, char *argv[])
 
 					if (ping == true)	//Calculate delay
 					{
-						//Take avg delay of the connection
+						//Take avg delay of the connection (one way)
 						avgDelayNS = wsModule.Calculate_AVG_Delay();
 						printf("Average Delay: %d ns, ", avgDelayNS);
 						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
 						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
+						
+						std::string filename = "";
+						for (int i = 1; i < argc; i++)
+						{
+							filename.append( argv[i]);
+							filename.append(" ");
+						}
+
+						file.open("../Logs/" + filename + ".tsv");
+						file << filename;
+						file << "\n";
+						file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
+						file << avgDelayNS << "	" << wsModule.GetHighest() << "	" << wsModule.GetLowest() << "\n";
+						file.close();
 					}
 					else //Time data
 					{
@@ -205,6 +221,19 @@ int main(int argc, char *argv[])
 						}
 						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal / iterations, high, lowest);		
 						
+						std::string filename = "";
+						for (int i = 1; i < argc; i++)
+						{
+							filename.append(argv[i]);
+							filename.append(" ");
+						}
+
+						file.open("../Logs/" + filename + ".tsv");
+						file << filename;
+						file << "\n";
+						file << "AvrageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
+						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
+						file.close();
 					}
 					
 				}
@@ -241,6 +270,20 @@ int main(int argc, char *argv[])
 						printf("Average Delay: %d ns, ", avgDelayNS);
 						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
 						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
+					
+						std::string filename = "";
+						for (int i = 1; i < argc; i++)
+						{
+							filename.append(argv[i]);
+							filename.append(" ");
+						}
+
+						file.open("../Logs/" + filename + ".tsv");
+						file << filename;
+						file << "\n";
+						file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
+						file << avgDelayNS << "	" << wsModule.GetHighest() << "	" << wsModule.GetLowest() << "\n";
+						file.close();
 					}
 					else //Time data
 					{
@@ -261,6 +304,20 @@ int main(int argc, char *argv[])
 							}
 						}
 						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal/iterations, high, lowest);
+					
+						std::string filename = "";
+						for (int i = 1; i < argc; i++)
+						{
+							filename.append(argv[i]);
+							filename.append(" ");
+						}
+
+						file.open("../Logs/" + filename + ".tsv");
+						file << filename;
+						file << "\n";
+						file << "AvrageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
+						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
+						file.close();
 					}
 
 

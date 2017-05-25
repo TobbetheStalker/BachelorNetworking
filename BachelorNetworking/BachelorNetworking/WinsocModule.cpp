@@ -585,7 +585,6 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 
 int WinsocModule::TCP_Send_Data()
 {
-	//1GB = 1073741824 bytes;
 	char data[100000];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
@@ -637,7 +636,6 @@ int WinsocModule::UDP_Send_Data(char * ip)
 
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 
-	//1GB = 1073741824 bytes;
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
 	int id = 0;
@@ -716,7 +714,7 @@ int WinsocModule::Calculate_AVG_Delay()
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
 		{
-			this->TCP_Update();
+			this->ReadMessagesFromClients();
 		}
 
 	}
