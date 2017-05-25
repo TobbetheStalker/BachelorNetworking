@@ -538,9 +538,11 @@ void WinsocModule::UDP_WaitForData()
 		const unsigned int packet_size = sizeof(Packet);
 
 		char data[8];
-		data[0] = TRANSFER_COMPLETE;
-		data[4] = this->m_missedPackets;
-
+		int value = (int)TRANSFER_COMPLETE;
+		memcpy(&data, &value, sizeof(int));
+		value = this->m_missedPackets;
+		memcpy(&data[4], &value, sizeof(int));
+		
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
 		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/65000, this->m_missedPackets);
