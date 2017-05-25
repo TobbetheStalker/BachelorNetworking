@@ -53,7 +53,7 @@ private:
 	int					data_total;
 	int					highest;
 	int					lowest;
-	int					averageLoss;
+	double				averageLoss;
 	int					highestLoss;
 	int					lowestLoss;
 
@@ -94,14 +94,15 @@ public:
 
 	int		Calculate_AVG_Delay();	//TCP
 	int		Calculate_AVG_Delay(char* ip);	//UDP
-	void		Calcualet_Loss();
+	void	Clear_PacketLoss_Vector();
+	void	Calcualet_Loss();
 	bool	GetIsConnected();
 	bool	GetTransferComplete();
 	void	Clock_Start();
 	int		Clock_Stop(bool ms=false);
 	int		GetHighest();
 	int		GetLowest();
-	int		GetAverageLoss();
+	double	GetAverageLoss();
 	int		GetHighestLoss();
 	int		GetLowestLoss();
 };

@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 						file.open("../Logs/" + filename + ".tsv");
 						file << filename;
 						file << "\n";
-						file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
+						file << "AverageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
 						file << avgDelayNS << "	" << wsModule.GetHighest() << "	" << wsModule.GetLowest() << "\n";
 						file.close();
 					}
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
 						file.open("../Logs/" + filename + ".tsv");
 						file << filename;
 						file << "\n";
-						file << "AvrageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
+						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file.close();
 					}
@@ -270,9 +270,6 @@ int main(int argc, char *argv[])
 						printf("Average Delay: %d ns, ", avgDelayNS);
 						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
 						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
-						printf("Average Loss: %d ns, ", wsModule.GetAverageLoss());
-						printf("Highest Loss: %d ns, ", wsModule.GetHighestLoss());
-						printf("Lowest Loss: %d ns\n", wsModule.GetLowestLoss());
 					
 						std::string filename = "";
 						for (int i = 1; i < argc; i++)
@@ -290,6 +287,7 @@ int main(int argc, char *argv[])
 					}
 					else //Time data
 					{
+						wsModule.Clear_PacketLoss_Vector();
 						for (int i = 0; i < iterations; i++)
 						{
 							//Send data
@@ -307,7 +305,12 @@ int main(int argc, char *argv[])
 							}
 						}
 						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal/iterations, high, lowest);
-					
+	
+						wsModule.Calcualet_Loss();
+						printf("Average Loss: %f, ", wsModule.GetAverageLoss());
+						printf("Highest Loss: %d, ", wsModule.GetHighestLoss());
+						printf("Lowest Loss: %d \n", wsModule.GetLowestLoss());
+
 						std::string filename = "";
 						for (int i = 1; i < argc; i++)
 						{
@@ -316,10 +319,13 @@ int main(int argc, char *argv[])
 						}
 
 						file.open("../Logs/" + filename + ".tsv");
-						file << filename;
-						file << "\n";
-						file << "AvrageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
+						file << filename << "\n";
+						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
+						file << "\n";
+						file << "AverageLoss	HighestLoss	LowestLoss\n";
+						file << wsModule.GetAverageLoss() << "	" << wsModule.GetHighestLoss() << "	" << wsModule.GetLowestLoss() << "\n";
+
 						file.close();
 					}
 

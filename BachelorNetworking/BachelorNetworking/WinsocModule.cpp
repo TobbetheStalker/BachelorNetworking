@@ -655,7 +655,6 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	int id = 0;
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
 	int addS = sizeof(this->m_RecvAddr);
-	this->m_packet_loss.clear();	//Clear the packet loss vector
 
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	
@@ -774,6 +773,11 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 	return this->m_Avg_Delay;
 }
 
+void WinsocModule::Clear_PacketLoss_Vector()
+{
+	this->m_packet_loss.clear();
+}
+
 void WinsocModule::Calcualet_Loss()
 {
 	float result = 0;
@@ -785,13 +789,15 @@ void WinsocModule::Calcualet_Loss()
 	for (itr = this->m_packet_loss.begin(); itr != this->m_packet_loss.end();)
 	{
 		int value = *itr._Ptr;
+		
 		if (value > this->highestLoss)
 		{
-			highestLoss = value;
+			this->highestLoss = value;
 		}
-		else if (value < lowestLoss)
+		
+		if (value < lowestLoss)
 		{
-			lowestLoss = value;
+			this->lowestLoss = value;
 		}
 
 		result += value;
@@ -992,7 +998,7 @@ int WinsocModule::GetLowest()
 	return this->lowest;
 }
 
-int WinsocModule::GetAverageLoss()
+double WinsocModule::GetAverageLoss()
 {
 	return this->averageLoss;
 }
