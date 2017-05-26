@@ -717,7 +717,7 @@ int WinsocModule::Calculate_AVG_Delay()
 	//Clear any reamining times
 	this->m_ping_times.clear();
 
-	for (int i = 0; i < 300; i++)
+	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
 		//Start the clock
 		this->Clock_Start();
@@ -738,7 +738,7 @@ int WinsocModule::Calculate_AVG_Delay()
 	return this->m_Avg_Delay;
 }
 
-int WinsocModule::Calculate_AVG_Delay(char * ip)
+int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -751,15 +751,38 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 	*/
 
 	//Clear any reamining times
+	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 	this->m_ping_times.clear();
+	char* data = nullptr;
 
-	for (int i = 0; i < 300; i++)
+	switch (packetsize)
+	{
+		case 4:
+			data = new char[4];
+		case 512:
+			data = new char[512];
+		case 1024:
+			data = new char[1024];
+		case 1500:
+			data = new char[1500];
+		case 2048:
+			data = new char[2048];
+	}
+
+	//Add the header at the begining of the data
+	int value = (int)CLOCK_SYNC;
+	memcpy(&data, &value, sizeof(int));
+
+	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
 		//Start the clock
 		this->Clock_Start();
 		
 		//Send the packet
-		this->UDP_Send(CLOCK_SYNC, ip);
+		//this->UDP_Send(CLOCK_SYNC, ip);
+
+		sendto(this->m_UDP_Socket, data, sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
+
 
 		while (this->m_ping_in_progress)
 		{
@@ -770,6 +793,8 @@ int WinsocModule::Calculate_AVG_Delay(char * ip)
 
 	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
 	
+	delete[] data;
+
 	return this->m_Avg_Delay;
 }
 

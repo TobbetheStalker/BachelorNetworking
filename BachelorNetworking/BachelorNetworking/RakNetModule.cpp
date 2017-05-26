@@ -242,7 +242,7 @@ int RakNetModule::Calculate_AVG_Delay()
 	//Clear any reamining times
 	this->m_ping_times.clear();
 
-	for (int i = 0; i < 300; i++)
+	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
 		//Start the clock
 		this->Clock_Start();

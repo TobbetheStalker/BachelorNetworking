@@ -1,6 +1,0 @@
--s -u -ip 169.254.94.177 
-AverageTime (ms)	HighestTime (ms)	LowestTime (ms)
-12071	12278	11892
-
-AverageLoss	HighestLoss	LowestLoss
-2.2	4	0

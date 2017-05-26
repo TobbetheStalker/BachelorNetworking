@@ -93,7 +93,7 @@ public:
 	int		UDP_Send_Data(char* ip);
 
 	int		Calculate_AVG_Delay();	//TCP
-	int		Calculate_AVG_Delay(char* ip);	//UDP
+	int		Calculate_AVG_Delay(char* ip, int packetsize);	//UDP
 	void	Clear_PacketLoss_Vector();
 	void	Calcualet_Loss();
 	bool	GetIsConnected();

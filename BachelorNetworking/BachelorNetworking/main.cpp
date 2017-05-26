@@ -265,12 +265,8 @@ int main(int argc, char *argv[])
 				{
 					if (ping == true)	//Calculate delay
 					{
-						//Take avg delay of the connection
-						avgDelayNS = wsModule.Calculate_AVG_Delay(ip);
-						printf("Average Delay: %d ns, ", avgDelayNS);
-						printf("Highest Delay: %d ns, ", wsModule.GetHighest());
-						printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
-					
+						
+						file.open("../Logs/" + filename + ".tsv");
 						std::string filename = "";
 						for (int i = 1; i < argc; i++)
 						{
@@ -278,11 +274,38 @@ int main(int argc, char *argv[])
 							filename.append(" ");
 						}
 
-						file.open("../Logs/" + filename + ".tsv");
 						file << filename;
 						file << "\n";
-						file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
-						file << avgDelayNS << "	" << wsModule.GetHighest() << "	" << wsModule.GetLowest() << "\n";
+						//Take avg delay of the connection
+						for (int i = 0; i < 5; i++)
+						{
+							switch(i)
+							{
+								case 0:
+									file << "4 bytes:\n";
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 4);
+								case 1:
+									file << "512 bytes:\n";
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 512);
+								case 2:
+									file << "1024 bytes:\n";
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1024);
+								case 3:
+									file << "1500 bytes:\n";
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1500);
+								case 4:
+									file << "2048 bytes:\n";
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 2048);
+							}
+								
+							printf("Average Delay: %d ns, ", avgDelayNS);
+							printf("Highest Delay: %d ns, ", wsModule.GetHighest());
+							printf("Lowest Delay: %d ns\n", wsModule.GetLowest());
+								
+							file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
+							file << avgDelayNS << "	" << wsModule.GetHighest() << "	" << wsModule.GetLowest() << "\n";
+							file << "\n";
+						}
 						file.close();
 					}
 					else //Time data
