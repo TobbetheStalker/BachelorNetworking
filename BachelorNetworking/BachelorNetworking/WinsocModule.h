@@ -104,8 +104,8 @@ public:
 	int		GetLowest();
 	int		GetLost();
 	double	GetAverageLoss();
-	int		GetHighestLoss();
-	int		GetLowestLoss();
+	double		GetHighestLoss();
+	double		GetLowestLoss();
 };
 
 #endif;

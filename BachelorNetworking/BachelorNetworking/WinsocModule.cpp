@@ -1172,12 +1172,12 @@ double WinsocModule::GetAverageLoss()
 	return this->averageLoss;
 }
 
-int WinsocModule::GetHighestLoss()
+double WinsocModule::GetHighestLoss()
 {
 	return this->highestLoss;
 }
 
-int WinsocModule::GetLowestLoss()
+double WinsocModule::GetLowestLoss()
 {
 	return this->lowestLoss;
 }
