@@ -135,7 +135,7 @@ void WinsocModule::UDP_Update()
 	
 	// Setup timeval variable. If 0,0 it will return imedietly
 	timeval timeout;
-	timeout.tv_sec = 0;
+	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 
 	// Setup fd_set structure
@@ -153,7 +153,9 @@ void WinsocModule::UDP_Update()
 		return;
 	}
 	else if (retval == 0) {
-		//printf("Timeout, No incoming data\n");
+		this->m_missedPackets++;
+		printf("Timeout, No incoming data. Current Loss: %d\n", this->m_missedPackets);
+		this->m_ping_in_progress = false;
 		return;
 	}
 	
@@ -702,7 +704,7 @@ float WinsocModule::GetAvrgRTT()
 	return result;
 }
 
-int WinsocModule::Calculate_AVG_Delay()
+int WinsocModule::Calculate_AVG_Delay(int packetsize)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -716,14 +718,44 @@ int WinsocModule::Calculate_AVG_Delay()
 
 	//Clear any reamining times
 	this->m_ping_times.clear();
+	this->highest = -1;
+	this->lowest = 9999999;
+	this->m_missedPackets = 0;
+	char* data = nullptr;
+
+	switch (packetsize)
+	{
+	case 4:
+		data = new char[4];
+		break;
+	case 512:
+		data = new char[512];
+		break;
+	case 1024:
+		data = new char[1024];
+		break;
+	case 1500:
+		data = new char[1500];
+		break;
+	case 2048:
+		data = new char[2048];
+		break;
+	}
+	printf("Packetsize: %d\n", packetsize);
+	
+	//Add the header at the begining of the data
+	int value = (int)CLOCK_SYNC;
+	memcpy(data, &value, sizeof(int));
 
 	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
-		//Start the clock
-		this->Clock_Start();
+		// Set current time
+		this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+		// Set to not send more pings since it will disrupt the timers
+		this->m_ping_in_progress = true;
 
 		//Send the packet
-		this->TCP_Send(CLOCK_SYNC);
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, sizeof(data));
 
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
@@ -733,8 +765,33 @@ int WinsocModule::Calculate_AVG_Delay()
 
 	}
 
-	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
-	
+	float total = 0;
+	int count = 0;
+	std::vector<int>::iterator itr;
+
+	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
+	{
+		int value = *itr._Ptr / 2; //We only care of one-way time
+
+		if (value > this->highest)
+		{
+			this->highest = value;
+		}
+
+		if (value < this->lowest)
+		{
+			this->lowest = value;
+		}
+
+		total += value;
+		count++;
+		itr++;
+	}
+
+	this->m_Avg_Delay = (total / count); //nano-seconds
+
+	delete[] data;
+
 	return this->m_Avg_Delay;
 }
 
@@ -756,6 +813,7 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 	this->m_ping_times.clear();
 	this->highest = -1;
 	this->lowest = 9999999;
+	this->m_missedPackets = 0;
 	char* data = nullptr;
 
 	switch (packetsize)
@@ -784,8 +842,11 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 
 	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
-		//Start the clock
-		this->Clock_Start();
+		// Set current time
+		this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+
+		// Set to not send more pings since it will disrupt the timers
+		this->m_ping_in_progress = true;
 		
 		//Send the packet
 		//this->UDP_Send(CLOCK_SYNC, ip);
@@ -799,7 +860,31 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 
 	}
 
-	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
+
+	float total = 0;
+	int count = 0;
+	std::vector<int>::iterator itr;
+
+	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
+	{
+		int value = *itr._Ptr / 2; //We only care of one-way time
+
+		if (value > this->highest)
+		{
+			this->highest = value;
+		}
+		
+		if (value < this->lowest)
+		{
+			this->lowest = value;
+		}
+
+		total += value;
+		count++;
+		itr++;
+	}
+
+	this->m_Avg_Delay = (total / count); //nano-seconds
 	
 	delete[] data;
 
@@ -1002,16 +1087,6 @@ int WinsocModule::Clock_Stop(bool ms)
 
 	}
 	
-
-	if (result > this->highest)
-	{
-		this->highest = result;
-	}
-	else if (result < this->lowest)
-	{
-		this->lowest = result;
-	}
-
 	//Push back the result
 	this->m_ping_times.push_back(result);
 
@@ -1029,6 +1104,11 @@ int WinsocModule::GetHighest()
 int WinsocModule::GetLowest()
 {
 	return this->lowest;
+}
+
+int WinsocModule::GetLost()
+{
+	return this->m_missedPackets;
 }
 
 double WinsocModule::GetAverageLoss()

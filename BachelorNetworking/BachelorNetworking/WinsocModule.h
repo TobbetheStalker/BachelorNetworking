@@ -92,7 +92,7 @@ public:
 	void	UDP_Send(PacketHeader headertype, char* ip);
 	int		UDP_Send_Data(char* ip);
 
-	int		Calculate_AVG_Delay();	//TCP
+	int		Calculate_AVG_Delay(int packetsize);	//TCP
 	int		Calculate_AVG_Delay(char* ip, int packetsize);	//UDP
 	void	Clear_PacketLoss_Vector();
 	void	Calcualet_Loss();
@@ -102,6 +102,7 @@ public:
 	int		Clock_Stop(bool ms=false);
 	int		GetHighest();
 	int		GetLowest();
+	int		GetLost();
 	double	GetAverageLoss();
 	int		GetHighestLoss();
 	int		GetLowestLoss();
