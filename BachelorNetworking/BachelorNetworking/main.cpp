@@ -265,16 +265,15 @@ int main(int argc, char *argv[])
 				{
 					if (ping == true)	//Calculate delay
 					{
-						
-						file.open("../Logs/" + filename + ".tsv");
 						std::string filename = "";
 						for (int i = 1; i < argc; i++)
 						{
 							filename.append(argv[i]);
 							filename.append(" ");
 						}
-
-						file << filename;
+						file.open("../Logs/" + filename + ".tsv");
+						file << filename << "\n";
+						file << "Nummber of Iterations: " << PING_ITERATIONS;
 						file << "\n";
 						//Take avg delay of the connection
 						for (int i = 0; i < 5; i++)
@@ -284,18 +283,23 @@ int main(int argc, char *argv[])
 								case 0:
 									file << "4 bytes:\n";
 									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 4);
+									break;
 								case 1:
 									file << "512 bytes:\n";
 									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 512);
+									break;
 								case 2:
 									file << "1024 bytes:\n";
 									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1024);
+									break;
 								case 3:
 									file << "1500 bytes:\n";
 									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1500);
+									break;
 								case 4:
 									file << "2048 bytes:\n";
 									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 2048);
+									break;
 							}
 								
 							printf("Average Delay: %d ns, ", avgDelayNS);

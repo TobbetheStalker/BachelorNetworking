@@ -751,27 +751,36 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 	*/
 
 	//Clear any reamining times
+
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
 	this->m_ping_times.clear();
+	this->highest = -1;
+	this->lowest = 9999999;
 	char* data = nullptr;
 
 	switch (packetsize)
 	{
 		case 4:
 			data = new char[4];
+			break;
 		case 512:
 			data = new char[512];
+			break;
 		case 1024:
 			data = new char[1024];
+			break;
 		case 1500:
 			data = new char[1500];
+			break;
 		case 2048:
 			data = new char[2048];
+			break;
 	}
+	printf("Packetsize: %d\n", packetsize);
 
 	//Add the header at the begining of the data
 	int value = (int)CLOCK_SYNC;
-	memcpy(&data, &value, sizeof(int));
+	memcpy(data, &value, sizeof(int));
 
 	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
@@ -782,7 +791,6 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 		//this->UDP_Send(CLOCK_SYNC, ip);
 
 		sendto(this->m_UDP_Socket, data, sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
-
 
 		while (this->m_ping_in_progress)
 		{
