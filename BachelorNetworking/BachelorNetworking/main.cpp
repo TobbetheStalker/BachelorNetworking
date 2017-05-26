@@ -150,8 +150,10 @@ int main(int argc, char *argv[])
 	int timeMS = 0;
 	int totalTimeNS = 0;
 	int timetotal = 0;
-	double high = -1;
-	double lowest = 999999999;
+	int high = -1;
+	int lowest = 999999999;
+	double dhigh = -1.0;
+	double dlow = 999999999.0;
 	int iterations = 5;
 	std::ofstream file;
 
@@ -381,7 +383,9 @@ int main(int argc, char *argv[])
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file << "\n";
 						file << "AverageLoss	HighestLoss	LowestLoss\n";
-						file << wsModule.GetAverageLoss() << "	" << wsModule.GetHighestLoss() << "	" << wsModule.GetLowestLoss() << "\n";
+						std::ostringstream os;
+						os << (double)wsModule.GetAverageLoss() << "	" << (double)wsModule.GetHighestLoss() << "	" << (double)wsModule.GetLowestLoss() << "\n";
+						file << os.str();
 
 						file.close();
 					}
