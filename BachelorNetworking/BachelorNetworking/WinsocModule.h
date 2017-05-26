@@ -42,7 +42,7 @@ private:
 
 	std::chrono::time_point<std::chrono::steady_clock> m_start_time;
 	std::vector<int>	m_ping_times;
-	std::vector<int>	m_packet_loss;
+	std::vector<double>	m_packet_loss;
 	bool				m_ping_in_progress;
 	int					m_Avg_Delay;
 	bool				isConnected;
@@ -54,8 +54,8 @@ private:
 	int					highest;
 	int					lowest;
 	double				averageLoss;
-	int					highestLoss;
-	int					lowestLoss;
+	double				highestLoss;
+	double				lowestLoss;
 
 	timeval timeout;
 	fd_set fds;

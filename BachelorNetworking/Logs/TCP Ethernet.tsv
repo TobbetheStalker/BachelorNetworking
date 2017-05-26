@@ -1,22 +1,22 @@
--s -t -ip 193.11.186.183 -p 
+-s -t -ip 169.254.94.177 -p 
 Nummber of Iterations: 100000
 4 bytes:
 AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
-864881	191968521	592087
+50810	165502	44262
 
 512 bytes:
 AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
-904201	237621168	585673
+50681	185388	43941
 
 1024 bytes:
 AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
-884653	190553092	601389
+50842	485602	44262
 
 1500 bytes:
 AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
-911324	154382186	588559
+50710	193407	43300
 
 2048 bytes:
 AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
-880311	159559584	589201
+50565	109693	44262
 

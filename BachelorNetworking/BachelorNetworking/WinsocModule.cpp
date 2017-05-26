@@ -539,11 +539,11 @@ void WinsocModule::UDP_WaitForData()
 		this->m_RecvAddr.sin_addr.s_addr = inet_addr(inet_ntoa(si_other.sin_addr));
 		const unsigned int packet_size = sizeof(Packet);
 
-		char data[8];
+		char data[12];
 		int value = (int)TRANSFER_COMPLETE;
 		memcpy(&data, &value, sizeof(int));
-		value = this->m_missedPackets;
-		memcpy(&data[4], &value, sizeof(int));
+		double loss = this->m_missedPackets / (this->data_total / 65000);
+		memcpy(&data[4], &loss, sizeof(double));
 		
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
@@ -651,6 +651,18 @@ int WinsocModule::UDP_Send_Data(char * ip)
 {
 
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
+	//Se if we recived a response
+	struct sockaddr_in si_other;
+	int slen = sizeof(si_other);
+	int	data_length;
+	unsigned int header = -1;
+	int data_read = 0;
+	double loss;
+
+	// Setup timeval variable. If 0,0 it will return imedietly
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
 
 	char data[65000];
 	const unsigned int packet_size = sizeof(data);
@@ -673,8 +685,52 @@ int WinsocModule::UDP_Send_Data(char * ip)
 			//printf("Sent DataPacket %d\n", id);
 		}
 
-		//Se if we recived a response
-		this->UDP_Update();
+		// Setup fd_set structure
+		fd_set fds;
+		FD_ZERO(&fds);
+		FD_SET(this->m_UDP_Socket, &fds);
+
+		// Return value:
+		// -1: error occurred
+		// 0: timed out
+		// > 0: data ready to be read
+		int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
+		if (retval == -1) {
+			printf("Error, something went wrong with the 'select' function\n");
+		}
+		else if (retval == 0) {
+			//printf("Timeout, No incoming data. Current Loss: %d\n", this->m_missedPackets);
+		}
+		else //There where data
+		{
+			//try to receive some data, this is a blocking call
+			data_length = recvfrom(this->m_UDP_Socket, this->network_message, MESSAGE_BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen);
+
+			while (data_read != data_length)
+			{
+				//Read the header (skip the first 4 bytes since it is virtual function information)
+				memcpy(&header, &this->network_message[data_read], sizeof(PacketHeader));
+
+				switch (header)
+				{
+				case TRANSFER_COMPLETE:
+					//printf("Recived TRANSFER_COMPLETE Packet \n");
+					memcpy(&loss, &this->network_message[data_read + 4], sizeof(double));;
+					
+					this->m_packet_loss.push_back(loss);
+					this->tranferComplete = true;
+					data_read += 12;
+					this->dataCounter = 0;
+					break;
+
+				default:
+					printf("Unkown packet type %d\n", header);
+					data_read = data_length;
+					break;
+				}
+
+			}
+		}
 
 	}
 	auto end_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
@@ -900,13 +956,13 @@ void WinsocModule::Calcualet_Loss()
 {
 	float result = 0;
 	int count = 0;
-	std::vector<int>::iterator itr;
+	std::vector<double>::iterator itr;
 	this->highestLoss = -1;
 	this->lowestLoss = 9999999;
 
 	for (itr = this->m_packet_loss.begin(); itr != this->m_packet_loss.end();)
 	{
-		int value = *itr._Ptr;
+		double value = (double)*itr._Ptr;
 		
 		if (value > this->highestLoss)
 		{
@@ -923,7 +979,7 @@ void WinsocModule::Calcualet_Loss()
 		itr++;
 	}
 
-	this->averageLoss = result / count;
+	this->averageLoss = (double)result / count;
 
 }
 
@@ -1125,5 +1181,6 @@ int WinsocModule::GetLowestLoss()
 {
 	return this->lowestLoss;
 }
+
 
 

@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
 	int timeMS = 0;
 	int totalTimeNS = 0;
 	int timetotal = 0;
-	int high = -1;
-	int lowest = 999999999;
+	double high = -1;
+	double lowest = 999999999;
 	int iterations = 5;
 	std::ofstream file;
 
@@ -257,8 +257,8 @@ int main(int argc, char *argv[])
 						}
 
 						file.open("../Logs/" + filename + ".tsv");
-						file << filename;
-						file << "\n";
+						file << filename << "\n";
+						file << "Packet Size: " << 100000 << " KB\n";
 						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file.close();
@@ -364,8 +364,8 @@ int main(int argc, char *argv[])
 	
 						wsModule.Calcualet_Loss();
 						printf("Average Loss: %f, ", wsModule.GetAverageLoss());
-						printf("Highest Loss: %d, ", wsModule.GetHighestLoss());
-						printf("Lowest Loss: %d \n", wsModule.GetLowestLoss());
+						printf("Highest Loss: %f, ", wsModule.GetHighestLoss());
+						printf("Lowest Loss: %f \n", wsModule.GetLowestLoss());
 
 						std::string filename = "";
 						for (int i = 1; i < argc; i++)
@@ -376,6 +376,7 @@ int main(int argc, char *argv[])
 
 						file.open("../Logs/" + filename + ".tsv");
 						file << filename << "\n";
+						file << "Packet Size: " << 65000 << " KB\n";
 						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file << "\n";
