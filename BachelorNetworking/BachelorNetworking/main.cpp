@@ -152,8 +152,6 @@ int main(int argc, char *argv[])
 	int timetotal = 0;
 	int high = -1;
 	int lowest = 999999999;
-	double dhigh = -1.0;
-	double dlow = 999999999.0;
 	int iterations = 5;
 	std::ofstream file;
 
@@ -349,6 +347,8 @@ int main(int argc, char *argv[])
 					}
 					else //Time data
 					{
+						int high = -1;
+						int lowest = 999999999;
 						wsModule.Clear_PacketLoss_Vector();
 						for (int i = 0; i < iterations; i++)
 						{
@@ -366,8 +366,8 @@ int main(int argc, char *argv[])
 								lowest = timeMS;
 							}
 						}
-						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal/iterations, high, lowest);
-	
+						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal / iterations, high, lowest);
+
 						wsModule.Calcualet_Loss();
 						printf("Average Loss: %f, ", wsModule.GetAverageLoss());
 						printf("Highest Loss: %f, ", wsModule.GetHighestLoss());
@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
 
 						file.close();
 					}
-
+					
 
 				}
 				else //Is set to be reciver

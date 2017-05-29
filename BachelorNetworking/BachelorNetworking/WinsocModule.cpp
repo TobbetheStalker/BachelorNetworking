@@ -547,7 +547,7 @@ void WinsocModule::UDP_WaitForData()
 		
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
-		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/65000, this->m_missedPackets);
+		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/UDP_PACKET_SIZE, this->m_missedPackets);
 		this->m_currentID = 0;
 		this->data_total = 0;
 		this->m_missedPackets = 0;
@@ -664,7 +664,7 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
-	char data[65000];
+	char data[UDP_PACKET_SIZE];
 	const unsigned int packet_size = sizeof(data);
 	int id = 0;
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
