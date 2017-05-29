@@ -190,7 +190,9 @@ int main(int argc, char *argv[])
 							filename.append(argv[i]);
 							filename.append(" ");
 						}
-						file.open("../Logs/" + filename + ".tsv");
+						std::ostringstream os;
+						os << PING_ITERATIONS;
+						file.open("../Logs/" + filename + " " + os.str() + ".tsv");
 						file << filename << "\n";
 						file << "Nummber of Iterations: " << PING_ITERATIONS << "\n";
 						//Take avg delay of the connection
@@ -301,7 +303,9 @@ int main(int argc, char *argv[])
 							filename.append(argv[i]);
 							filename.append(" ");
 						}
-						file.open("../Logs/" + filename + ".tsv");
+						std::ostringstream os;
+						os << PING_ITERATIONS;
+						file.open("../Logs/" + filename + " " + os.str() + ".tsv");
 						file << filename << "\n";
 						file << "Nummber of Iterations: " << PING_ITERATIONS << "\n";
 						//Take avg delay of the connection
