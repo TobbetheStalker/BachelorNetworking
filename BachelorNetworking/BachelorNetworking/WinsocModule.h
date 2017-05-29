@@ -56,7 +56,7 @@ private:
 	double				averageLoss;
 	double				highestLoss;
 	double				lowestLoss;
-	bool				finished;
+	int					currentIteration;
 
 	timeval timeout;
 	fd_set fds;
@@ -91,7 +91,7 @@ public:
 	void	TCP_Send(PacketHeader headertype);
 	int		TCP_Send_Data();
 	void	UDP_Send(PacketHeader headertype, char* ip);
-	int		UDP_Send_Data(char* ip);
+	int		UDP_Send_Data(char* ip, int iteration);
 
 	int		Calculate_AVG_Delay(int packetsize);	//TCP
 	int		Calculate_AVG_Delay(char* ip, int packetsize);	//UDP

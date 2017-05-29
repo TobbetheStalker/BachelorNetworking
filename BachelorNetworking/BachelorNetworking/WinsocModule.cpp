@@ -20,7 +20,7 @@ WinsocModule::WinsocModule()
 	this->network_message = new char[MESSAGE_BUFFER_SIZE];
 	this->highest = -1;
 	this->lowest = 9999999;
-	this->finished = false;
+	currentIteration = 0;
 }
 
 WinsocModule::~WinsocModule()
@@ -511,7 +511,14 @@ void WinsocModule::UDP_WaitForData()
 	}
 
 	int id;
+	int iteration;
 	memcpy(&id,UDP_network_data,sizeof(int));
+	memcpy(&iteration, UDP_network_data+4, sizeof(int));
+
+	if (iteration != currentIteration)
+	{
+		return;
+	}
 
 	if (id == 1) //If we recive a new set of packages
 	{
@@ -519,7 +526,6 @@ void WinsocModule::UDP_WaitForData()
 		this->m_currentID = 0;	
 		this->data_total = 0;
 		this->m_missedPackets = 0;
-		this->finished = false;
 	}
 
 	int dif = id - this->m_currentID;
@@ -534,7 +540,7 @@ void WinsocModule::UDP_WaitForData()
 	this->data_total += data_length;
 	//printf("%d, Loss: %d\n", this->data_total, this->m_missedPackets);
 
-	if (data_total >= DATA_SIZE && this->finished == false)
+	if (data_total >= DATA_SIZE)
 	{
 		//this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
 		
@@ -550,9 +556,9 @@ void WinsocModule::UDP_WaitForData()
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
 		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/UDP_PACKET_SIZE, this->m_missedPackets);
+		this->currentIteration++;
 		this->data_total = 0;
 		this->m_missedPackets = 0;
-		this->finished = true;
 	}
 }
 
@@ -649,7 +655,7 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	
 }
 
-int WinsocModule::UDP_Send_Data(char * ip)
+int WinsocModule::UDP_Send_Data(char * ip, int iteration)
 {
 
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
@@ -678,6 +684,7 @@ int WinsocModule::UDP_Send_Data(char * ip)
 	{	
 		id++;
 		memcpy(&data, &id, sizeof(int));
+		memcpy(&data[4], &iteration, sizeof(int));	//Which iteration the packet is from
 		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
 			printf("send failed\n");

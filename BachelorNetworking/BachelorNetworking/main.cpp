@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 						for (int i = 0; i < iterations; i++)
 						{
 							//Send data
-							timeMS = wsModule.UDP_Send_Data(ip);
+							timeMS = wsModule.UDP_Send_Data(ip, i);
 
 							timetotal += timeMS;
 							if (timeMS > high)
@@ -365,6 +365,7 @@ int main(int argc, char *argv[])
 							{
 								lowest = timeMS;
 							}
+							
 						}
 						printf("Average time: %d, Highest Time: %d, Lowest Time: %d\n", timetotal / iterations, high, lowest);
 
