@@ -500,6 +500,10 @@ void WinsocModule::UDP_WaitForData()
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(this->m_UDP_Socket, &fds);
+
 	int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
 	if (retval == -1) {
 		printf("Error, something went wrong with the 'select' function\n");
