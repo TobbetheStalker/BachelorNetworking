@@ -1,0 +1,22 @@
+-s -u -ip 169.254.94.177 -p 
+Nummber of Iterations: 1000
+4 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)	Loss(%): 
+88152	248574	64789	0
+
+512 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)	Loss(%): 
+82933	147861	74411	0
+
+1024 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)	Loss(%): 
+83248	143050	67035	0
+
+1500 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)	Loss(%): 
+81715	127333	65110	0
+
+2048 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)	Loss(%): 
+81739	134711	67676	0
+

@@ -1,0 +1,4 @@
+-s -tn -ip 169.254.94.177 
+Packet Size: 61440 KB
+AverageTime (ms)	HighestTime (ms)	LowestTime (ms)
+9116	9118	9116

@@ -20,6 +20,7 @@ WinsocModule::WinsocModule()
 	this->network_message = new char[MESSAGE_BUFFER_SIZE];
 	this->highest = -1;
 	this->lowest = 9999999;
+	this->finished = false;
 }
 
 WinsocModule::~WinsocModule()
@@ -518,6 +519,7 @@ void WinsocModule::UDP_WaitForData()
 		this->m_currentID = 0;	
 		this->data_total = 0;
 		this->m_missedPackets = 0;
+		this->finished = false;
 	}
 
 	int dif = id - this->m_currentID;
@@ -532,7 +534,7 @@ void WinsocModule::UDP_WaitForData()
 	this->data_total += data_length;
 	//printf("%d, Loss: %d\n", this->data_total, this->m_missedPackets);
 
-	if (data_total >= DATA_SIZE)
+	if (data_total >= DATA_SIZE && this->finished == false)
 	{
 		//this->UDP_Send(TRANSFER_COMPLETE, inet_ntoa(si_other.sin_addr));
 		
@@ -548,9 +550,9 @@ void WinsocModule::UDP_WaitForData()
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
 		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/UDP_PACKET_SIZE, this->m_missedPackets);
-		this->m_currentID = 0;
 		this->data_total = 0;
 		this->m_missedPackets = 0;
+		this->finished = true;
 	}
 }
 

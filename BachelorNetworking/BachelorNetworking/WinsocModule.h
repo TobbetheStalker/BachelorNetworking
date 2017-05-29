@@ -56,6 +56,7 @@ private:
 	double				averageLoss;
 	double				highestLoss;
 	double				lowestLoss;
+	bool				finished;
 
 	timeval timeout;
 	fd_set fds;
