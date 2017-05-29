@@ -542,7 +542,7 @@ void WinsocModule::UDP_WaitForData()
 		char data[12];
 		int value = (int)TRANSFER_COMPLETE;
 		memcpy(&data, &value, sizeof(int));
-		double loss = (double)(this->m_missedPackets / (double)(this->data_total / 65000));
+		double loss = (double)(this->m_missedPackets / (double)(this->data_total / UDP_PACKET_SIZE));
 		memcpy(&data[4], &loss, sizeof(double));
 		
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
