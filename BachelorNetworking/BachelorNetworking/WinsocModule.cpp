@@ -477,7 +477,7 @@ void WinsocModule::TCP_WaitForData()
 	}
 
 	this->data_total += data_length;
-	printf("%d\n",this->data_total);
+	//printf("%d\n",this->data_total);
 	
 	if (data_total >= DATA_SIZE)
 	{
@@ -601,7 +601,7 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 
 int WinsocModule::TCP_Send_Data()
 {
-	char data[100000];
+	char data[TCP_PACKET_SIZE];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
 
@@ -615,7 +615,7 @@ int WinsocModule::TCP_Send_Data()
 	{
 		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
 		
-		printf("Sent DataPacket %d\n", i);
+		//printf("Sent DataPacket %d\n", i);
 	}
 
 	//Recive Last ack

@@ -1,0 +1,22 @@
+-s -tn -ip 169.254.94.177 -p 
+Nummber of Iterations: 100000
+4 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
+51490	270384	43300
+
+512 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
+51069	158766	41696
+
+1024 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
+51406	178973	44582
+
+1500 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
+51457	117391	42979
+
+2048 bytes:
+AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)
+51753	226443	44262
+

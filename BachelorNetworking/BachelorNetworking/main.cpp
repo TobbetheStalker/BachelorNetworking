@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
 
 						file.open("../Logs/" + filename + ".tsv");
 						file << filename << "\n";
-						file << "Packet Size: " << 100000 << " KB\n";
+						file << "Packet Size: " << TCP_PACKET_SIZE << " KB\n";
 						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file.close();
