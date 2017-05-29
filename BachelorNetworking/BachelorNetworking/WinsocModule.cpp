@@ -495,19 +495,25 @@ void WinsocModule::UDP_WaitForData()
 
 	struct sockaddr_in si_other;
 	int slen = sizeof(si_other);
+	
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	int retval = select(this->m_UDP_Socket + 1, &fds, NULL, NULL, &timeout);
+	if (retval == -1) {
+		printf("Error, something went wrong with the 'select' function\n");
+	}
+	else if (retval == 0) {
+		//printf("Timeout, No incoming data");
+		return;
+	}
 
 	//try to receive some data, this is a blocking call
 	if ((data_length = recvfrom(this->m_UDP_Socket, this->UDP_network_data, UDP_BUFFER_SIZE, 0, (struct sockaddr *) &si_other, &slen)) == SOCKET_ERROR)
 	{
 		printf("recvfrom() failed with error code : %d \n", WSAGetLastError());
 		//exit(EXIT_FAILURE);
-	}
-
-	// If there was no data
-	if (data_length <= 0)
-	{
-		//No data recieved, end the function
-		return;
 	}
 
 	int id;
