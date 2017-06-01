@@ -152,13 +152,13 @@ int main(int argc, char *argv[])
 	int timetotal = 0;
 	int high = -1;
 	int lowest = 999999999;
-	int iterations = 5;
+	int iterations = 1;
 	std::ofstream file;
 
 	if (SetParam(argc, argv)) 
 	{
 		WinsocModule wsModule;
-		//RakNetModule rnModule;
+		RakNetModule rnModule;
 	
 		if (p != Protocol::RAKNET)	//Winsoc
 		{
@@ -641,72 +641,70 @@ int main(int argc, char *argv[])
 //		delete[]data;
 //		RakNet::RakPeerInterface::DestroyInstance(client);
 //		RakNet::RakPeerInterface::DestroyInstance(server);
-
-
 #pragma endregion RakNet
 
 
 #pragma region
-		//else //RakNet
-		//{
-		//	rnModule.Initialize();
+		else //RakNet
+		{
+			rnModule.Initialize();
 
-		//	if (isSender)
-		//	{
-		//		rnModule.Connect(ip);
+			if (isSender)
+			{
+				rnModule.Connect(ip);
 
-		//		//Wait until handshake is completed
-		//		while (rnModule.GetIsConnected() != true)
-		//		{
-		//			rnModule.Update();
-		//		}
+				//Wait until handshake is completed
+				while (rnModule.GetIsConnected() != true)
+				{
+					rnModule.Update();
+				}
 
 
-		//		if (ping)
-		//		{
-		//			//Take avg delay of the connection
-		//			avgDelayNS = rnModule.Calculate_AVG_Delay();
-		//			printf("Average Delay: %d ns", avgDelayNS);
-		//		}
-		//		else
-		//		{
-		//			//Start Timer
-		//			rnModule.Clock_Start();
+				if (ping)
+				{
+					//Take avg delay of the connection
+					avgDelayNS = rnModule.Calculate_AVG_Delay();
+					printf("Average Delay: %d ns", avgDelayNS);
+				}
+				else
+				{
+					//Start Timer
+					rnModule.Clock_Start();
 
-		//			//Send data
-		//			rnModule.SendData();
+					//Send data
+					rnModule.SendData();
 
-		//			//Recive Last ack
-		//			while (rnModule.GetTransferComplete() == false)
-		//			{
-		//				rnModule.Update();
-		//			}
+					//Recive Last ack
+					while (rnModule.GetTransferComplete() == false)
+					{
+						rnModule.Update();
+					}
 
-		//			//Stop timer
-		//			timeMS = rnModule.Clock_Stop(true);
+					//Stop timer
+					timeMS = rnModule.Clock_Stop(true);
 
-		//			//Take time - avg delay
-		//			printf("Total Time: %d\n", timeMS);
-		//		}
+					//Take time - avg delay
+					printf("Total Time: %d\n", timeMS);
+				}
 
-		//	}
-		//	else
-		//	{
-		//		if (ping)
-		//		{
-		//			while (true)
-		//				rnModule.Update();
-		//		}
-		//		else
-		//		{
-		//			while (true)
-		//				rnModule.WaitForData();
-		//		}
-		//		
-		//	}
-		//	
-		//	rnModule.Shutdown();
-		//}
+			}
+			else
+			{
+				if (ping)
+				{
+					while (true)
+						rnModule.Update();
+				}
+				else
+				{
+					while (true)
+						rnModule.WaitForData();
+				}
+				
+			}
+			
+			rnModule.Shutdown();
+		}
 
 #pragma endregion OldRakNet
 

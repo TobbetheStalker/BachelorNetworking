@@ -1,7 +1,7 @@
 -s -u -ip 169.254.94.177 
 Packet Size: 61440 KB
 AverageTime (ms)	HighestTime (ms)	LowestTime (ms)
-10751	10889	10657
+10522	10565	10494
 
 AverageLoss	HighestLoss	LowestLoss
-0.000812496	0.00143045	0.000171654
+0.00012588	0.000228872	5.72181e-05
