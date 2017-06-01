@@ -9,7 +9,7 @@ const int UDP_BUFFER_SIZE = 100000;
 const int TCP_BUFFER_SIZE = 1024000 * 300;	//Mb * 300
 const int OS_BUFFERS_SIZE = 1024000 * 300;
 const int MESSAGE_BUFFER_SIZE = 200;
-const int PING_ITERATIONS = 1000;
+const int PING_ITERATIONS = 100000;
 const int UDP_PACKET_SIZE = 10240;
 const int TCP_PACKET_SIZE = 61440;
 
@@ -51,7 +51,6 @@ struct DataPacket
 
 };
 
-#pragma pack(1)
 struct RakNetPacket
 {
 	unsigned char	typeId;
