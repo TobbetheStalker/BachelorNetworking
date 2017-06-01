@@ -25,6 +25,8 @@ private:
 	bool				isConnected;
 	int					dataCounter;
 	int					data_total;
+	int					highest;
+	int					lowest;
 
 public:
 
@@ -46,11 +48,13 @@ public:
 	void Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability);
 	void SendData();
 	
-	int	Calculate_AVG_Delay();
+	int	Calculate_AVG_Delay(int packetsize);
 	void	Clock_Start();
 	int		Clock_Stop(bool ms = false);
 	bool	GetTransferComplete();
 	bool	GetIsConnected();
+	int		GetHighest();
+	int		GetLowest();
 };
 
 #endif

@@ -417,232 +417,6 @@ int main(int argc, char *argv[])
 #pragma endregion Winsoc
 		
 		}
-#pragma region
-
-
-//		RakNet::RakPeerInterface *client, *server;
-//		char *data = new char[BIG_PACKET_SIZE];;
-//		int socketFamily = AF_INET;
-//		RakNet::TimeMS start, stop;
-//		RakNet::TimeMS nextStatTime = RakNet::GetTimeMS() + 1000;
-//		RakNet::Packet *packet;
-//		start = RakNet::GetTimeMS();
-//#pragma region
-//
-//		if (isSender) //Sender
-//		{
-//			client = RakNet::RakPeerInterface::GetInstance();
-//
-//			client->SetTimeoutTime(5000, RakNet::UNASSIGNED_SYSTEM_ADDRESS);
-//			RakNet::SocketDescriptor socketDescriptor(0, 0);
-//			socketDescriptor.socketFamily = socketFamily;
-//			RakNet::StartupResult sr;
-//			sr = client->Startup(4, &socketDescriptor, 1);
-//			if (sr != RakNet::RAKNET_STARTED)
-//			{
-//				printf("Client failed to start. Error=%i\n", sr);
-//				return 1;
-//			}
-//			client->SetSplitMessageProgressInterval(10000); // Get ID_DOWNLOAD_PROGRESS notifications
-//															//	client->SetPerConnectionOutgoingBandwidthLimit(28800);
-//
-//			printf("Started client on %s\n", client->GetMyBoundAddress().ToString(true));
-//
-//			client->Connect(data, 6881, 0, 0);
-//
-//		}
-//		else //Reciver
-//		{
-//			server = RakNet::RakPeerInterface::GetInstance();
-//
-//			server->SetTimeoutTime(5000, RakNet::UNASSIGNED_SYSTEM_ADDRESS);
-//			RakNet::SocketDescriptor socketDescriptor(6881, 0);
-//			socketDescriptor.socketFamily = socketFamily;
-//			server->SetMaximumIncomingConnections(4);
-//			RakNet::StartupResult sr;
-//			sr = server->Startup(4, &socketDescriptor, 1);
-//			if (sr != RakNet::RAKNET_STARTED)
-//			{
-//				printf("Server failed to start. Error=%i\n", sr);
-//				return 1;
-//			}
-//			// server->SetPerConnectionOutgoingBandwidthLimit(40000);
-//
-//			printf("Started server on %s\n", server->GetMyBoundAddress().ToString(true));
-//		}
-//
-//		printf("My IP addresses:\n");
-//		RakNet::RakPeerInterface *rakPeer;
-//		if (server)
-//			rakPeer = server;
-//		else
-//			rakPeer = client;
-//		unsigned int i;
-//		for (i = 0; i < rakPeer->GetNumberOfAddresses(); i++)
-//		{
-//			printf("%i. %s\n", i + 1, rakPeer->GetLocalIP(i));
-//		}
-//#pragma endregion Init
-//
-//#pragma region
-//
-//		while (true)
-//		{
-//
-//			if (isSender) //Client
-//			{
-//				packet = client->Receive();
-//				while (packet)
-//				{
-//					if (packet->data[0] == ID_DOWNLOAD_PROGRESS)
-//					{
-//						RakNet::BitStream progressBS(packet->data, packet->length, false);
-//						progressBS.IgnoreBits(8); // ID_DOWNLOAD_PROGRESS
-//						unsigned int progress;
-//						unsigned int total;
-//						unsigned int partLength;
-//
-//						// Disable endian swapping on reading this, as it's generated locally in ReliabilityLayer.cpp
-//						progressBS.ReadBits((unsigned char*)&progress, BYTES_TO_BITS(sizeof(progress)), true);
-//						progressBS.ReadBits((unsigned char*)&total, BYTES_TO_BITS(sizeof(total)), true);
-//						progressBS.ReadBits((unsigned char*)&partLength, BYTES_TO_BITS(sizeof(partLength)), true);
-//
-//						printf("Progress: msgID=%i Progress %i/%i Partsize=%i\n",
-//							(unsigned char)packet->data[0],
-//							progress,
-//							total,
-//							partLength);
-//					}
-//					else if (packet->data[0] == 255)
-//					{
-//						if (packet->length != BIG_PACKET_SIZE) //Size check
-//						{
-//							printf("Test failed. %i bytes (wrong number of bytes).\n", packet->length);
-//							//quit = true;
-//							break;
-//						}
-//						if (BIG_PACKET_SIZE <= 100000)	//Data check
-//						{
-//							for (int i = 0; i < BIG_PACKET_SIZE; i++)
-//							{
-//								if (packet->data[i] != 255 - (i & 255))
-//								{
-//									printf("Test failed. %i bytes (bad data).\n", packet->length);
-//									//quit = true;
-//									break;
-//								}
-//							}
-//						}
-//
-//					}
-//					else if (packet->data[0] == 254)
-//					{
-//						printf("Got high priority message.\n");
-//					}
-//					else if (packet->data[0] == ID_CONNECTION_LOST)
-//						printf("ID_CONNECTION_LOST from %s\n", packet->systemAddress.ToString());
-//					else if (packet->data[0] == ID_DISCONNECTION_NOTIFICATION)
-//						printf("ID_DISCONNECTION_NOTIFICATION from %s\n", packet->systemAddress.ToString());
-//					else if (packet->data[0] == ID_NEW_INCOMING_CONNECTION)
-//						printf("ID_NEW_INCOMING_CONNECTION from %s\n", packet->systemAddress.ToString());
-//					else if (packet->data[0] == ID_CONNECTION_REQUEST_ACCEPTED)
-//					{
-//						start = RakNet::GetTimeMS();
-//						printf("ID_CONNECTION_REQUEST_ACCEPTED from %s\n", packet->systemAddress.ToString());
-//					}
-//					else if (packet->data[0] == ID_CONNECTION_ATTEMPT_FAILED)
-//						printf("ID_CONNECTION_ATTEMPT_FAILED from %s\n", packet->systemAddress.ToString());
-//
-//					client->DeallocatePacket(packet);
-//					packet = client->Receive();
-//				}
-//			}
-//			else //Server
-//			{
-//				for (packet = server->Receive(); packet; server->DeallocatePacket(packet), packet = server->Receive())
-//				{
-//					if (packet->data[0] == ID_NEW_INCOMING_CONNECTION || packet->data[0] == 253)
-//					{
-//						printf("Starting send\n");
-//						start = RakNet::GetTimeMS();
-//						if (BIG_PACKET_SIZE <= 100000)
-//						{
-//							for (int i = 0; i < BIG_PACKET_SIZE; i++)
-//								data[i] = 255 - (i & 255);
-//						}
-//						else
-//						{
-//							data[0] = (unsigned char)255;
-//						}
-//
-//						server->Send(data, BIG_PACKET_SIZE, LOW_PRIORITY, RELIABLE_ORDERED_WITH_ACK_RECEIPT, 0, packet->systemAddress, false);
-//						// Keep the stat from updating until the messages move to the thread or it quits right away
-//						nextStatTime = RakNet::GetTimeMS() + 1000;
-//					}
-//					if (packet->data[0] == ID_CONNECTION_LOST)
-//						printf("ID_CONNECTION_LOST from %s\n", packet->systemAddress.ToString());
-//					else if (packet->data[0] == ID_DISCONNECTION_NOTIFICATION)
-//						printf("ID_DISCONNECTION_NOTIFICATION from %s\n", packet->systemAddress.ToString());
-//					else if (packet->data[0] == ID_NEW_INCOMING_CONNECTION)
-//						printf("ID_NEW_INCOMING_CONNECTION from %s\n", packet->systemAddress.ToString());
-//					else if (packet->data[0] == ID_CONNECTION_REQUEST_ACCEPTED)
-//						printf("ID_CONNECTION_REQUEST_ACCEPTED from %s\n", packet->systemAddress.ToString());
-//				}
-//			}
-//
-//		}
-//
-//#pragma region
-//		if (RakNet::GetTimeMS() > nextStatTime)
-//		{
-//			nextStatTime = RakNet::GetTimeMS() + 1000;
-//			RakNet::RakNetStatistics rssSender;
-//			RakNet::RakNetStatistics rssReceiver;
-//			if (server)
-//			{
-//				unsigned int i;
-//				unsigned short numSystems;
-//				server->GetConnectionList(0, &numSystems);
-//				if (numSystems>0)
-//				{
-//					for (i = 0; i < numSystems; i++)
-//					{
-//						server->GetStatistics(server->GetSystemAddressFromIndex(i), &rssSender);
-//						StatisticsToString(&rssSender, data, 2);
-//						printf("==== System %i ====\n", i + 1);
-//						printf("%s\n\n", data);
-//					}
-//				}
-//			}
-//			if (client && server == 0 && client->GetGUIDFromIndex(0) != RakNet::UNASSIGNED_RAKNET_GUID)
-//			{
-//				client->GetStatistics(client->GetSystemAddressFromIndex(0), &rssReceiver);
-//				StatisticsToString(&rssReceiver, data, 2);
-//				printf("%s\n\n", data);
-//			}
-//		}
-//#pragma endregion UpdateStatistics
-//
-//#pragma endregion Update
-//
-//		stop = RakNet::GetTimeMS();
-//		double seconds = (double)(stop - start) / 1000.0;
-//
-//		if (server)
-//		{
-//			RakNet::RakNetStatistics *rssSender2 = server->GetStatistics(server->GetSystemAddressFromIndex(0));
-//			StatisticsToString(rssSender2, data, 1);
-//			printf("%s", data);
-//		}
-//
-//		printf("%i bytes per second (%.2f seconds). Press enter to quit\n", (int)((double)(BIG_PACKET_SIZE) / seconds), seconds);
-//		//Gets(data, BIG_PACKET_SIZE);
-//
-//		delete[]data;
-//		RakNet::RakPeerInterface::DestroyInstance(client);
-//		RakNet::RakPeerInterface::DestroyInstance(server);
-#pragma endregion RakNet
-
 
 #pragma region
 		else //RakNet
@@ -662,9 +436,53 @@ int main(int argc, char *argv[])
 
 				if (ping)
 				{
+					std::string filename = "";
+					for (int i = 1; i < argc; i++)
+					{
+						filename.append(argv[i]);
+						filename.append(" ");
+					}
+					std::ostringstream os;
+					os << PING_ITERATIONS;
+					file.open("../Logs/" + filename + " " + os.str() + ".tsv");
+					file << filename << "\n";
+					file << "Nummber of Iterations: " << PING_ITERATIONS << "\n";
 					//Take avg delay of the connection
-					avgDelayNS = rnModule.Calculate_AVG_Delay();
-					printf("Average Delay: %d ns", avgDelayNS);
+					for (int i = 0; i < 5; i++)
+					{
+						switch (i)
+						{
+						case 0:
+							file << "4 bytes:\n";
+							avgDelayNS = rnModule.Calculate_AVG_Delay(4);
+							break;
+						case 1:
+							file << "512 bytes:\n";
+							avgDelayNS = rnModule.Calculate_AVG_Delay(512);
+							break;
+						case 2:
+							file << "1024 bytes:\n";
+							avgDelayNS = rnModule.Calculate_AVG_Delay(1024);
+							break;
+						case 3:
+							file << "1500 bytes:\n";
+							avgDelayNS = rnModule.Calculate_AVG_Delay(1500);
+							break;
+						case 4:
+							file << "2048 bytes:\n";
+							avgDelayNS = rnModule.Calculate_AVG_Delay(2048);
+							break;
+						}
+
+						printf("Average Delay: %d ns, ", avgDelayNS);
+						printf("Highest Delay: %d ns, ", rnModule.GetHighest());
+						printf("Lowest Delay: %d ns \n", rnModule.GetLowest());
+
+						file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)\n";
+						file << avgDelayNS << "	" << rnModule.GetHighest() << "	" << rnModule.GetLowest() << "\n";
+						file << "\n";
+					}
+					file.close();
 				}
 				else
 				{

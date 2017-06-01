@@ -45,6 +45,16 @@ bool RakNetModule::GetIsConnected()
 	return this->isConnected;
 }
 
+int RakNetModule::GetHighest()
+{
+	return this->highest;
+}
+
+int RakNetModule::GetLowest()
+{
+	return this->lowest;
+}
+
 float RakNetModule::GetAvrgRTT()
 {
 	float result = 0;
@@ -70,6 +80,8 @@ RakNetModule::RakNetModule()
 	this->isConnected = false;
 	this->dataCounter = 0;
 	this->data_total = 0;
+	this->highest = -1;
+	this->lowest = 9999999;
 }
 
 RakNetModule::~RakNetModule()
@@ -142,12 +154,12 @@ void RakNetModule::Update()
 			break;
 
 		case R_CLOCK_SYNC:
-			printf("Recived R_CLOCK_SYNC Packet\n");
+			//printf("Recived R_CLOCK_SYNC Packet\n");
 			this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC_RESPONSE, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
 			break;
 
 		case R_CLOCK_SYNC_RESPONSE:
-			printf("Recived R_CLOCK_SYNC_RESPONSE Packet\n");
+			//printf("Recived R_CLOCK_SYNC_RESPONSE Packet\n");
 			this->Clock_Stop();
 			break;
 
@@ -227,7 +239,7 @@ void RakNetModule::SendData()
 
 }
 
-int RakNetModule::Calculate_AVG_Delay()
+int RakNetModule::Calculate_AVG_Delay(int packetsize)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -241,14 +253,42 @@ int RakNetModule::Calculate_AVG_Delay()
 
 	//Clear any reamining times
 	this->m_ping_times.clear();
+	this->highest = -1;
+	this->lowest = 9999999;
+	char* data = nullptr;
 
+	switch (packetsize)
+	{
+	case 4:
+		data = new char[4];
+		break;
+	case 512:
+		data = new char[512];
+		break;
+	case 1024:
+		data = new char[1024];
+		break;
+	case 1500:
+		data = new char[1500];
+		break;
+	case 2048:
+		data = new char[2048];
+		break;
+	}
+	printf("Packetsize: %d\n", packetsize);
+
+
+	data[0] = DefaultMessageIDTypes::R_CLOCK_SYNC;
 	for (int i = 0; i < PING_ITERATIONS; i++)
 	{
 		//Start the clock
-		this->Clock_Start();
+		//this->Clock_Start();
+		this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
+		this->m_ping_in_progress = true;
 
 		//Send the packet
-		this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+		//this->Send(DefaultMessageIDTypes::R_CLOCK_SYNC, IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED);
+		peer->Send(data, sizeof(data), IMMEDIATE_PRIORITY, RELIABLE_SEQUENCED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 
 		//Wait for the message until it arrives, When it does it will set the variable to false and end the loop
 		while (this->m_ping_in_progress)
@@ -258,6 +298,32 @@ int RakNetModule::Calculate_AVG_Delay()
 
 	}
 
-	this->m_Avg_Delay = this->GetAvrgRTT() / 2; //nano-seconds
+	float total = 0;
+	int count = 0;
+	std::vector<int>::iterator itr;
+
+	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
+	{
+		int value = *itr._Ptr / 2; //We only care of one-way time
+
+		if (value > this->highest)
+		{
+			this->highest = value;
+		}
+
+		if (value < this->lowest)
+		{
+			this->lowest = value;
+		}
+
+		total += value;
+		count++;
+		itr++;
+	}
+
+	this->m_Avg_Delay = (total / count); //nano-seconds
+
+	delete[] data;
+
 	return this->m_Avg_Delay;
 }
