@@ -12,6 +12,8 @@
 #include "NetworkData.h"
 #include "NetworkService.h"
 #include <math.h>
+#include <iostream>
+#include <fstream>
 
 #ifdef _WIN64
 #define PACKETOFFSET 8
