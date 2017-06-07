@@ -846,7 +846,7 @@ int WinsocModule::Calculate_AVG_Delay(int packetsize)
 	std::ofstream file;
 	std::ostringstream os;
 
-	os << packetsize << " " << PING_ITERATIONS << ".txt";
+	os << "../Logs/" << packetsize << " " << PING_ITERATIONS << ".txt";
 	file.open(os.str());
 	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
 	{
@@ -947,7 +947,7 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 	std::ofstream file;
 	std::ostringstream os;
 
-	os << packetsize << " " << PING_ITERATIONS << ".txt";
+	os << "../Logs/" << packetsize << " " << PING_ITERATIONS << ".txt";
 	file.open(os.str());
 	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
 	{
