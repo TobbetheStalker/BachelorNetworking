@@ -301,7 +301,11 @@ int RakNetModule::Calculate_AVG_Delay(int packetsize)
 	float total = 0;
 	int count = 0;
 	std::vector<int>::iterator itr;
+	std::ofstream file;
+	std::ostringstream os;
 
+	os << packetsize << " " << PING_ITERATIONS << ".txt";
+	file.open(os.str());
 	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
 	{
 		int value = *itr._Ptr / 2; //We only care of one-way time
@@ -315,12 +319,13 @@ int RakNetModule::Calculate_AVG_Delay(int packetsize)
 		{
 			this->lowest = value;
 		}
-
+		file << value << "\n";
 		total += value;
 		count++;
 		itr++;
 	}
 
+	file.close();
 	this->m_Avg_Delay = (total / count); //nano-seconds
 
 	delete[] data;

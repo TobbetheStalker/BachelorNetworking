@@ -8,6 +8,9 @@
 #include "BitStream.h"
 #include "NetworkData.h"
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #define DEFAULT_PORT "6881"
 
