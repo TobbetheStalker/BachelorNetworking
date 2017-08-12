@@ -28,7 +28,7 @@ WinsocModule::~WinsocModule()
 	this->Shutdown();
 }
 
-int WinsocModule::Initialize(Protocol newProtocol)
+int WinsocModule::Initialize(Protocol newProtocol, bool isSender)
 {
 	printf("Initializing Network module... \n");
 
@@ -44,7 +44,7 @@ int WinsocModule::Initialize(Protocol newProtocol)
 	//Chose what protocol to initialize the sockets with
 	if (newProtocol == Protocol::TCP)
 	{
-		if (this->TCP_Initialize(false))
+		if (this->TCP_Initialize(false, isSender))
 		{
 			//Success
 			this->m_CurrentProtocol = newProtocol;
@@ -58,7 +58,7 @@ int WinsocModule::Initialize(Protocol newProtocol)
 	}
 	else if (newProtocol == Protocol::TCP_WITH_NODELAY)
 	{
-		if (this->TCP_Initialize(true))
+		if (this->TCP_Initialize(true, isSender))
 		{
 			this->m_CurrentProtocol = newProtocol;
 			printf("Network module Initialized with type %d protocol\n", this->m_CurrentProtocol);
@@ -251,7 +251,7 @@ int WinsocModule::TCP_Connect(char * ip)
 		hints.ai_protocol = IPPROTO_TCP;    // Set to use TCP
 
 		// Resolve the server address and port
-		int iResult = getaddrinfo(ip, DEFAULT_PORT, &hints, &result);
+		int iResult = getaddrinfo(ip, RECIVER_PORT, &hints, &result);
 
 		if (iResult != 0)
 		{
@@ -622,10 +622,6 @@ int WinsocModule::TCP_Send_Data()
 	char data[TCP_PACKET_SIZE];
 	const unsigned int packet_size = sizeof(data);
 	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
-
-	DataPacket packet;
-	packet.packet_type = DATA;
-	packet.nrOfPackets = nrOfPackets;
 	
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
@@ -1022,7 +1018,7 @@ bool WinsocModule::GetTransferComplete()
 	return this->tranferComplete;
 }
 
-int WinsocModule::TCP_Initialize(bool noDelay)
+int WinsocModule::TCP_Initialize(bool noDelay, bool isSender)
 {
 	this->m_TCP_ListnerSocket = INVALID_SOCKET;	// The socket that will listen
 	int iResult;
@@ -1039,7 +1035,14 @@ int WinsocModule::TCP_Initialize(bool noDelay)
 	hints.ai_flags = AI_PASSIVE;		// The socket address will be used in a call to the bind function
 	
 	// Resolve the server address and port
-	iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);	//NULL = Dont need addres since it will be on local machine
+	if (isSender)
+	{
+		iResult = getaddrinfo(NULL, SENDER_PORT, &hints, &result);	//NULL = Dont need addres since it will be on local machine
+	}
+	else
+	{
+		iResult = getaddrinfo(NULL, RECIVER_PORT, &hints, &result);	//NULL = Dont need addres since it will be on local machine
+	}
 
 	if (iResult != 0) {
 		printf("getaddrinfo failed with error: %d\n", iResult);

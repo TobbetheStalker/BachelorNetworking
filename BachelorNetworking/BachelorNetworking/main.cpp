@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 		if (p != Protocol::RAKNET)	//Winsoc
 		{
 #pragma region
-			wsModule.Initialize(p);
+			wsModule.Initialize(p, isSender);
 
 			if (p == Protocol::TCP || p == Protocol::TCP_WITH_NODELAY)
 			{

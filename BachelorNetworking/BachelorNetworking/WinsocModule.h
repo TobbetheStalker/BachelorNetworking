@@ -21,7 +21,8 @@
 #define PACKETOFFSET 4
 #endif
 
-#define DEFAULT_PORT "6881"
+#define RECIVER_PORT "6881"
+#define SENDER_PORT "6882"
 
 class WinsocModule
 {
@@ -71,7 +72,7 @@ private:
 
 	int		GetMyIp();
 
-	int		TCP_Initialize(bool noDelay);
+	int		TCP_Initialize(bool noDelay, bool isSender);
 	int		UDP_Initialize();
 
 
@@ -81,7 +82,7 @@ public:
 	WinsocModule();
 	~WinsocModule();
 
-	int		Initialize(Protocol newProtocol);
+	int		Initialize(Protocol newProtocol, bool isSender);
 	int		Shutdown();
 	void	Update();
 	void	TCP_Update();
