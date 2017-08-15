@@ -478,7 +478,7 @@ void WinsocModule::TCP_WaitForData()
 	}
 
 	this->data_total += data_length;
-	//printf("%d\n",this->data_total);
+	printf("%d\n",this->data_total);
 	
 	if (data_total >= DATA_SIZE)
 	{
@@ -488,7 +488,7 @@ void WinsocModule::TCP_WaitForData()
 	}
 }
 
-void WinsocModule::UDP_WaitForData()
+void WinsocModule::UDP_WaitForData(int packetSize)
 {
 	int data_length = -1;
 	int data_read = 0;
@@ -560,12 +560,12 @@ void WinsocModule::UDP_WaitForData()
 		char data[12];
 		int value = (int)TRANSFER_COMPLETE;
 		memcpy(&data, &value, sizeof(int));
-		double loss = (double)(this->m_missedPackets / (double)(this->data_total / UDP_PACKET_SIZE));
+		double loss = (double)(this->m_missedPackets / (double)(this->data_total / packetSize));
 		memcpy(&data[4], &loss, sizeof(double));
 		
 		sendto(this->m_UDP_Socket, reinterpret_cast<char*>(&data), sizeof(data), 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr));
 
-		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/UDP_PACKET_SIZE, this->m_missedPackets);
+		printf("Sent TRANSFER_COMPLETE, Packages Recived: %d, Loss: %d\n", this->data_total/ packetSize, this->m_missedPackets);
 		this->currentIteration++;
 		this->data_total = 0;
 		this->m_missedPackets = 0;
@@ -617,17 +617,19 @@ void WinsocModule::TCP_Send(PacketHeader headertype)
 	NetworkService::sendMessage(this->m_TCP_SenderSocket, reinterpret_cast<char*>(&packet), packet_size);
 }
 
-int WinsocModule::TCP_Send_Data()
+int WinsocModule::TCP_Send_Data(int packetSize)
 {
-	char data[TCP_PACKET_SIZE];
-	const unsigned int packet_size = sizeof(data);
-	int nrOfPackets = ceil(DATA_SIZE / packet_size)+1;
+	char* data = new char[packetSize];
+
+	//char data[TCP_PACKET_SIZE];
+	//const unsigned int packet_size = sizeof(data);
+	int nrOfPackets = ceil(DATA_SIZE / packetSize)+1;
 	
 	this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 
 	for(int i = 1; i <= nrOfPackets; i++)
 	{
-		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packet_size);
+		NetworkService::sendMessage(this->m_TCP_SenderSocket, data, packetSize);
 		
 		//printf("Sent DataPacket %d\n", i);
 	}
@@ -661,7 +663,7 @@ void WinsocModule::UDP_Send(PacketHeader headertype, char* ip)
 	
 }
 
-int WinsocModule::UDP_Send_Data(char * ip, int iteration)
+int WinsocModule::UDP_Send_Data(char * ip, int iteration, int packetSize)
 {
 
 	this->m_RecvAddr.sin_addr.s_addr = inet_addr(ip);
@@ -678,8 +680,9 @@ int WinsocModule::UDP_Send_Data(char * ip, int iteration)
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
-	char data[UDP_PACKET_SIZE];
-	const unsigned int packet_size = sizeof(data);
+	char data[61440];
+	//char data[UDP_PACKET_SIZE];
+	//const unsigned int packet_size = sizeof(*data);
 	int id = 0;
 	sockaddr* add = (struct sockaddr*) &this->m_RecvAddr;
 	int addS = sizeof(this->m_RecvAddr);
@@ -691,7 +694,7 @@ int WinsocModule::UDP_Send_Data(char * ip, int iteration)
 		id++;
 		memcpy(&data, &id, sizeof(int));
 		memcpy(&data[4], &iteration, sizeof(int));	//Which iteration the packet is from
-		if (sendto(this->m_UDP_Socket, data, packet_size, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
+		if (sendto(this->m_UDP_Socket, data, packetSize, 0, (struct sockaddr*) &this->m_RecvAddr, sizeof(this->m_RecvAddr)) == SOCKET_ERROR)
 		{
 			printf("send failed\n");
 		}
@@ -775,7 +778,7 @@ float WinsocModule::GetAvrgRTT()
 	return result;
 }
 
-int WinsocModule::Calculate_AVG_Delay(int packetsize)
+int WinsocModule::Calculate_AVG_Delay(int packetsize, int pingIterations)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -818,7 +821,7 @@ int WinsocModule::Calculate_AVG_Delay(int packetsize)
 	int value = (int)CLOCK_SYNC;
 	memcpy(data, &value, sizeof(int));
 
-	for (int i = 0; i < PING_ITERATIONS; i++)
+	for (int i = 0; i < pingIterations; i++)
 	{
 		// Set current time
 		this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
@@ -842,7 +845,7 @@ int WinsocModule::Calculate_AVG_Delay(int packetsize)
 	std::ofstream file;
 	std::ostringstream os;
 
-	os << "../Logs/" << packetsize << " " << PING_ITERATIONS << ".txt";
+	os << "../Logs/" << packetsize << " " << pingIterations << ".txt";
 	file.open(os.str());
 	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
 	{
@@ -871,7 +874,7 @@ int WinsocModule::Calculate_AVG_Delay(int packetsize)
 	return this->m_Avg_Delay;
 }
 
-int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
+int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize, int pingIterations)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -916,7 +919,7 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 	int value = (int)CLOCK_SYNC;
 	memcpy(data, &value, sizeof(int));
 
-	for (int i = 0; i < PING_ITERATIONS; i++)
+	for (int i = 0; i < pingIterations; i++)
 	{
 		// Set current time
 		this->m_start_time = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
@@ -943,7 +946,7 @@ int WinsocModule::Calculate_AVG_Delay(char * ip, int packetsize)
 	std::ofstream file;
 	std::ostringstream os;
 
-	os << "../Logs/" << packetsize << " " << PING_ITERATIONS << ".txt";
+	os << "../Logs/" << packetsize << " " << pingIterations << ".txt";
 	file.open(os.str());
 	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
 	{

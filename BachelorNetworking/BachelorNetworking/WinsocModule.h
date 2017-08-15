@@ -87,17 +87,17 @@ public:
 	void	Update();
 	void	TCP_Update();
 	void	TCP_WaitForData();
-	void	UDP_WaitForData();
+	void	UDP_WaitForData(int packetSize);
 	void	UDP_Update();
 	int		TCP_Connect(char* ip);
 
 	void	TCP_Send(PacketHeader headertype);
-	int		TCP_Send_Data();
+	int		TCP_Send_Data(int packetSize);
 	void	UDP_Send(PacketHeader headertype, char* ip);
-	int		UDP_Send_Data(char* ip, int iteration);
+	int		UDP_Send_Data(char* ip, int iteration, int packetSize);
 
-	int		Calculate_AVG_Delay(int packetsize);	//TCP
-	int		Calculate_AVG_Delay(char* ip, int packetsize);	//UDP
+	int		Calculate_AVG_Delay(int packetsize, int pingIterations);	//TCP
+	int		Calculate_AVG_Delay(char* ip, int packetsize, int pingIterations);	//UDP
 	void	Clear_PacketLoss_Vector();
 	void	Calcualet_Loss();
 	bool	GetIsConnected();

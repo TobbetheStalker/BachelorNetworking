@@ -239,7 +239,7 @@ void RakNetModule::SendData()
 
 }
 
-int RakNetModule::Calculate_AVG_Delay(int packetsize)
+int RakNetModule::Calculate_AVG_Delay(int packetsize, int pingIteration)
 {
 	/*
 	1. Start a timer to measure teh RTT
@@ -279,7 +279,7 @@ int RakNetModule::Calculate_AVG_Delay(int packetsize)
 
 
 	data[0] = DefaultMessageIDTypes::R_CLOCK_SYNC;
-	for (int i = 0; i < PING_ITERATIONS; i++)
+	for (int i = 0; i < pingIteration; i++)
 	{
 		//Start the clock
 		//this->Clock_Start();
@@ -304,7 +304,7 @@ int RakNetModule::Calculate_AVG_Delay(int packetsize)
 	std::ofstream file;
 	std::ostringstream os;
 
-	os <<"../Logs/" << packetsize << " " << PING_ITERATIONS << ".txt";
+	os <<"../Logs/" << packetsize << " " << pingIteration << ".txt";
 	file.open(os.str());
 	for (itr = this->m_ping_times.begin(); itr != this->m_ping_times.end();)
 	{

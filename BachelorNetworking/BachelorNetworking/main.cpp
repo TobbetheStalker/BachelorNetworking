@@ -22,6 +22,8 @@ std::string filename = "log";
 char* ip = "";
 bool isSender = false;
 bool ping = false;
+int pingIterations = 0;
+int packetSize = 0;
 #define BIG_PACKET_SIZE 83296256
 
 
@@ -119,7 +121,29 @@ bool SetParam(int argc, char* argv[])
 		}
 		else if (arg == "-p")
 		{
+			if (i + 1 < argc)	//Check so this is not the final parameter
+			{
+				pingIterations = std::stoi(argv[i + 1]);
+			}
+			else
+			{
+				printf("-p needs to be followed by number of iterations for the ping");
+				return 0;
+			}
+
 			ping = true;
+		}
+		else if (arg == "-ps")	//Packet size
+		{
+			if (i + 1 < argc)	//Check so this is not the final parameter
+			{
+				packetSize = std::stoi(argv[i + 1]);
+			}
+			else
+			{
+				printf("-ps needs to be followed by the selected packet size");
+				return 0;
+			}
 		}
 	}
 
@@ -186,10 +210,10 @@ int main(int argc, char *argv[])
 							filename.append(" ");
 						}
 						std::ostringstream os;
-						os << PING_ITERATIONS;
+						os << pingIterations;
 						file.open("../Logs/" + filename + " " + os.str() + ".tsv");
 						file << filename << "\n";
-						file << "Nummber of Iterations: " << PING_ITERATIONS << "\n";
+						file << "Nummber of Iterations: " << pingIterations << "\n";
 						//Take avg delay of the connection
 						for (int i = 0; i < 5; i++)
 						{
@@ -197,23 +221,23 @@ int main(int argc, char *argv[])
 							{
 							case 0:
 								file << "4 bytes:\n";
-								avgDelayNS = wsModule.Calculate_AVG_Delay(4);
+								avgDelayNS = wsModule.Calculate_AVG_Delay(4, pingIterations);
 								break;
 							case 1:
 								file << "512 bytes:\n";
-								avgDelayNS = wsModule.Calculate_AVG_Delay(512);
+								avgDelayNS = wsModule.Calculate_AVG_Delay(512, pingIterations);
 								break;
 							case 2:
 								file << "1024 bytes:\n";
-								avgDelayNS = wsModule.Calculate_AVG_Delay(1024);
+								avgDelayNS = wsModule.Calculate_AVG_Delay(1024, pingIterations);
 								break;
 							case 3:
 								file << "1500 bytes:\n";
-								avgDelayNS = wsModule.Calculate_AVG_Delay(1500);
+								avgDelayNS = wsModule.Calculate_AVG_Delay(1500, pingIterations);
 								break;
 							case 4:
 								file << "2048 bytes:\n";
-								avgDelayNS = wsModule.Calculate_AVG_Delay(2048);
+								avgDelayNS = wsModule.Calculate_AVG_Delay(2048, pingIterations);
 								break;
 							}
 
@@ -233,7 +257,7 @@ int main(int argc, char *argv[])
 						for (int i = 0; i < iterations; i++)
 						{
 							//Send data
-							timeMS = wsModule.TCP_Send_Data();
+							timeMS = wsModule.TCP_Send_Data(packetSize);
 
 							timetotal += timeMS;
 							if (timeMS > high)
@@ -257,7 +281,7 @@ int main(int argc, char *argv[])
 
 						file.open("../Logs/" + filename + ".tsv");
 						file << filename << "\n";
-						file << "Packet Size: " << TCP_PACKET_SIZE << " KB\n";
+						file << "Packet Size: " << packetSize << " B\n";
 						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file.close();
@@ -299,10 +323,10 @@ int main(int argc, char *argv[])
 							filename.append(" ");
 						}
 						std::ostringstream os;
-						os << PING_ITERATIONS;
+						os << pingIterations;
 						file.open("../Logs/" + filename + " " + os.str() + ".tsv");
 						file << filename << "\n";
-						file << "Nummber of Iterations: " << PING_ITERATIONS << "\n";
+						file << "Nummber of Iterations: " << pingIterations << "\n";
 						//Take avg delay of the connection
 						for (int i = 0; i < 5; i++)
 						{
@@ -310,32 +334,32 @@ int main(int argc, char *argv[])
 							{
 								case 0:
 									file << "4 bytes:\n";
-									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 4);
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 4, pingIterations);
 									break;
 								case 1:
 									file << "512 bytes:\n";
-									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 512);
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 512, pingIterations);
 									break;
 								case 2:
 									file << "1024 bytes:\n";
-									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1024);
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1024, pingIterations);
 									break;
 								case 3:
 									file << "1500 bytes:\n";
-									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1500);
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 1500, pingIterations);
 									break;
 								case 4:
 									file << "2048 bytes:\n";
-									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 2048);
+									avgDelayNS = wsModule.Calculate_AVG_Delay(ip, 2048, pingIterations);
 									break;
 							}
 								
 							printf("Average Delay: %d ns, ", avgDelayNS);
 							printf("Highest Delay: %d ns, ", wsModule.GetHighest());
 							printf("Lowest Delay: %d ns ", wsModule.GetLowest());
-							printf("Loss: %f \n", (double)wsModule.GetLost()/PING_ITERATIONS);
+							printf("Loss: %f \n", (double)wsModule.GetLost()/ pingIterations);
 							std::ostringstream os;
-							os << (double)wsModule.GetLost() / PING_ITERATIONS;
+							os << (double)wsModule.GetLost() / pingIterations;
 							file << "AvrageDelay (ns)	HighestDelay (ns)	LowestDelay (ns)	Loss(%): \n";
 							file << avgDelayNS << "	" << wsModule.GetHighest() << "	" << wsModule.GetLowest() <<"	" << os.str() << "\n";
 							file << "\n";
@@ -350,7 +374,7 @@ int main(int argc, char *argv[])
 						for (int i = 0; i < iterations; i++)
 						{
 							//Send data
-							timeMS = wsModule.UDP_Send_Data(ip, i);
+							timeMS = wsModule.UDP_Send_Data(ip, i, packetSize);
 
 							timetotal += timeMS;
 							if (timeMS > high)
@@ -380,7 +404,7 @@ int main(int argc, char *argv[])
 
 						file.open("../Logs/" + filename + ".tsv");
 						file << filename << "\n";
-						file << "Packet Size: " << UDP_PACKET_SIZE << " KB\n";
+						file << "Packet Size: " << packetSize << " B\n";
 						file << "AverageTime (ms)	HighestTime (ms)	LowestTime (ms)\n";
 						file << timetotal / iterations << "	" << high << "	" << lowest << "\n";
 						file << "\n";
@@ -404,7 +428,7 @@ int main(int argc, char *argv[])
 					else
 					{
 						while (true)
-							wsModule.UDP_WaitForData(); //Only need to update
+							wsModule.UDP_WaitForData(packetSize); //Only need to update
 					}
 
 				}
@@ -440,10 +464,10 @@ int main(int argc, char *argv[])
 						filename.append(" ");
 					}
 					std::ostringstream os;
-					os << PING_ITERATIONS;
+					os << pingIterations;
 					file.open("../Logs/" + filename + " " + os.str() + ".tsv");
 					file << filename << "\n";
-					file << "Nummber of Iterations: " << PING_ITERATIONS << "\n";
+					file << "Nummber of Iterations: " << pingIterations << "\n";
 					//Take avg delay of the connection
 					for (int i = 0; i < 5; i++)
 					{
@@ -451,23 +475,23 @@ int main(int argc, char *argv[])
 						{
 						case 0:
 							file << "4 bytes:\n";
-							avgDelayNS = rnModule.Calculate_AVG_Delay(4);
+							avgDelayNS = rnModule.Calculate_AVG_Delay(4, pingIterations);
 							break;
 						case 1:
 							file << "512 bytes:\n";
-							avgDelayNS = rnModule.Calculate_AVG_Delay(512);
+							avgDelayNS = rnModule.Calculate_AVG_Delay(512, pingIterations);
 							break;
 						case 2:
 							file << "1024 bytes:\n";
-							avgDelayNS = rnModule.Calculate_AVG_Delay(1024);
+							avgDelayNS = rnModule.Calculate_AVG_Delay(1024, pingIterations);
 							break;
 						case 3:
 							file << "1500 bytes:\n";
-							avgDelayNS = rnModule.Calculate_AVG_Delay(1500);
+							avgDelayNS = rnModule.Calculate_AVG_Delay(1500, pingIterations);
 							break;
 						case 4:
 							file << "2048 bytes:\n";
-							avgDelayNS = rnModule.Calculate_AVG_Delay(2048);
+							avgDelayNS = rnModule.Calculate_AVG_Delay(2048, pingIterations);
 							break;
 						}
 

@@ -51,7 +51,7 @@ public:
 	void Send(DefaultMessageIDTypes id, PacketPriority priority, PacketReliability reliability);
 	void SendData();
 	
-	int	Calculate_AVG_Delay(int packetsize);
+	int	Calculate_AVG_Delay(int packetsize, int pingIteration);
 	void	Clock_Start();
 	int		Clock_Stop(bool ms = false);
 	bool	GetTransferComplete();
