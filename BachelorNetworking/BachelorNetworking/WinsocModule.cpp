@@ -101,6 +101,14 @@ int WinsocModule::Shutdown()
 		WSACleanup();
 	}
 
+	delete[] this->network_data;
+	delete[] this->UDP_network_data;
+	delete[] this->network_message;
+
+	this->network_data = nullptr;
+	this->UDP_network_data = nullptr;
+	this->network_message = nullptr;
+
 	this->m_CurrentProtocol = Protocol::NONE;
 	return 0;
 }
@@ -645,6 +653,9 @@ int WinsocModule::TCP_Send_Data(int packetSize)
 	int result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - this->m_start_time).count();;
 
 	this->tranferComplete = false;
+
+	delete[] data;
+	data = nullptr;
 
 	return result;
 }
